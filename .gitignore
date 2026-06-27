@@ -7,6 +7,10 @@
 /storage/cache/*
 !/storage/.gitkeep
 
+# Uploaded product photos (managed at runtime; keep folder, ignore contents)
+/uploads/products/*
+!/uploads/products/.gitkeep
+
 # Dependencies
 /vendor/
 

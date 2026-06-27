@@ -105,3 +105,17 @@ table.data .row-ico .i3d { width: 22px; height: 22px; }
 
 .empty-row { text-align: center; color: var(--color-muted); padding: var(--space-7); }
 .loading { text-align: center; color: var(--color-muted); padding: var(--space-7); }
+
+
+/* ---- Product photo manager ---- */
+.photo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 10px; margin-bottom: 12px; }
+.photo-cell { position: relative; aspect-ratio: 1/1; border-radius: var(--radius-md); overflow: hidden; border: 2px solid var(--color-border); background: #fff; }
+.photo-cell.primary { border-color: var(--color-primary); }
+.photo-cell img { width: 100%; height: 100%; object-fit: cover; }
+.photo-badge { position: absolute; left: 6px; bottom: 6px; background: var(--color-primary); color: #fff; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; padding: 2px 7px; border-radius: var(--radius-pill); }
+.photo-star, .photo-del { position: absolute; width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; font-size: 13px; cursor: pointer; border: none; }
+.photo-star { left: 6px; bottom: 6px; background: rgba(0,0,0,.55); color: #fff; }
+.photo-star:hover { background: var(--color-primary); }
+.photo-del { right: 6px; top: 6px; background: rgba(0,0,0,.55); color: #fff; }
+.photo-del:hover { background: var(--color-sale); }
+.photo-empty { grid-column: 1/-1; color: var(--color-muted); font-size: var(--fs-sm); padding: var(--space-4); border: 1px dashed var(--color-border); border-radius: var(--radius-md); text-align: center; }

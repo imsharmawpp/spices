@@ -186,3 +186,15 @@
 .empty-ico .i3d, .empty-state .i3d { width: 60px; height: 60px; }
 .hero__art-float .i3d { width: 160px; height: 160px; }
 .cat-tile:hover .cat-tile__emoji .i3d { transform: scale(1.12) rotate(8deg); transition: transform .5s cubic-bezier(.16,.84,.44,1); }
+
+
+/* ---- Uploaded product photos (fill tiles; fall back to 3D icons when absent) ---- */
+.tile-photo { width: 100%; height: 100%; object-fit: cover; display: block; }
+.card__media { position: relative; }
+.card__media .tile-emoji:has(.tile-photo) { width: 100%; height: 100%; }
+.card__media .tile-photo { border-radius: inherit; }
+.card:hover .card__media .tile-emoji:has(.tile-photo) { transform: none; }
+.pdp__main .tile-photo { border-radius: var(--radius-lg); }
+.pdp__thumbs button .tile-photo { width: 100%; height: 100%; border-radius: var(--radius-sm); }
+.cart-line__media .tile-photo, .cart-row__media .tile-photo { border-radius: var(--radius-sm); }
+.row-ico .tile-photo { border-radius: 8px; }

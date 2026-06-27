@@ -65,6 +65,10 @@ $router->get('/api/admin/products/{id}', $admin([$ac, 'getProduct']));
 $router->patch('/api/admin/products/{id}', $admin([$ac, 'updateProduct']));
 $router->delete('/api/admin/products/{id}', $admin([$ac, 'deleteProduct']));
 $router->post('/api/admin/products/{id}/variants', $admin([$ac, 'createVariant']));
+$router->post('/api/admin/products/{id}/images', $admin([$ac, 'uploadImage']));
+
+$router->patch('/api/admin/images/{id}/primary', $admin([$ac, 'setPrimaryImage']));
+$router->delete('/api/admin/images/{id}', $admin([$ac, 'deleteImage']));
 
 $router->patch('/api/admin/variants/{id}', $admin([$ac, 'updateVariant']));
 $router->delete('/api/admin/variants/{id}', $admin([$ac, 'deleteVariant']));

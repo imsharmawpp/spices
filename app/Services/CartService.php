@@ -56,7 +56,8 @@ final class CartService
         if ($cartId) {
             $stmt = $pdo->prepare(
                 'SELECT ci.id, ci.quantity, v.id AS variant_id, v.name AS variant_name, v.price, v.stock_qty, v.sku,
-                        p.name AS product_name, p.slug, p.emoji, p.accent_color, p.brand
+                        p.name AS product_name, p.slug, p.emoji, p.accent_color, p.brand,
+                        (SELECT path FROM product_images pi WHERE pi.product_id=p.id AND pi.path LIKE \'uploads/%\' ORDER BY pi.is_primary DESC, pi.sort_order, pi.id LIMIT 1) AS image
                  FROM cart_items ci
                  JOIN product_variants v ON v.id = ci.variant_id
                  JOIN products p ON p.id = v.product_id

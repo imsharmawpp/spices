@@ -10,7 +10,21 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   document.title = `${product.name} · Saffra Spices`;
   let selected = (product.variants.find(v => v.stock_qty > 0) || product.variants[0]);
-  const tiles = [product.emoji, product.emoji].filter(Boolean);
+  const gallery = (product.images || []).map(im => (im.path[0] === '/' || im.path.startsWith('http')) ? im.path : '/' + im.path);
+  let activeImg = 0;
+
+  function mainMedia() {
+    if (gallery.length) {
+      return `<img class="tile-photo" id="pdp-photo" src="${gallery[activeImg]}" alt="${Fmt.escape(product.name)}">`;
+    }
+    return productIcon(product, 'pdp-ico');
+  }
+  function thumbs() {
+    if (gallery.length) {
+      return gallery.map((src, i) => `<button class="${i === activeImg ? 'active' : ''}" data-thumb="${i}"><img class="tile-photo" src="${src}" alt=""></button>`).join('');
+    }
+    return `<button class="active" data-thumb="0" style="${tileStyle(product.accent_color)}">${productIcon(product, 'tile-ico tile-ico--sm')}</button>`;
+  }
 
   function priceBlock() {
     const onSale = selected.compare_at_price && selected.compare_at_price > selected.price;
@@ -23,10 +37,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     <nav class="breadcrumb"><a href="/">Home</a> / <a href="/shop/${product.category_slug}">${Fmt.escape(product.category_name)}</a> / ${Fmt.escape(product.name)}</nav>
     <div class="pdp">
       <div class="pdp__gallery">
-        <div class="pdp__main" id="pdp-main" style="${tileStyle(product.accent_color)}">${productIcon(product, 'pdp-ico')}</div>
-        <div class="pdp__thumbs">
-          ${tiles.map((t, i) => `<button class="${i === 0 ? 'active' : ''}" data-thumb="${i}" style="${tileStyle(product.accent_color)}">${productIcon(product, 'tile-ico tile-ico--sm')}</button>`).join('')}
-        </div>
+        <div class="pdp__main" id="pdp-main" style="${tileStyle(product.accent_color)}">${mainMedia()}</div>
+        <div class="pdp__thumbs">${thumbs()}</div>
       </div>
       <div class="pdp__info">
         <span class="card__brand">${Fmt.escape(product.brand || 'Saffra')}${product.is_organic ? ' · Organic' : ''}</span>
@@ -102,8 +114,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       render();
     });
     root.querySelectorAll('[data-thumb]').forEach(b => b.onclick = () => {
+      activeImg = +b.dataset.thumb;
       root.querySelectorAll('[data-thumb]').forEach(x => x.classList.remove('active'));
       b.classList.add('active');
+      const photo = root.querySelector('#pdp-photo');
+      if (photo && gallery[activeImg]) photo.src = gallery[activeImg];
     });
     root.querySelector('#q-inc').onclick = () => { qty = Math.min(selected.stock_qty, qty + 1); root.querySelector('#q-val').textContent = qty; };
     root.querySelector('#q-dec').onclick = () => { qty = Math.max(1, qty - 1); root.querySelector('#q-val').textContent = qty; };

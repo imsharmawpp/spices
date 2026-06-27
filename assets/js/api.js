@@ -25,11 +25,10 @@ const API = {
 
 // ---- formatting helpers ----
 const Fmt = {
-  symbol: '₹',
+  symbol: '$',
   money(n) {
     const v = Number(n || 0);
-    // Indian digit grouping (e.g. ₹1,19,999.00)
-    const num = v.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const num = v.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     return this.symbol + num;
   },
   stars(rating) {
@@ -251,4 +250,13 @@ const Icons = {
 // Convenience: tile markup for a product/cart item.
 function productIcon(item, cls = 'tile-ico') {
   return Icons.html(Icons.forProduct(item), item.accent_color, cls);
+}
+
+// Tile visual: an uploaded photo when present, else the 3D-icon fallback.
+function productThumb(item, iconCls = 'tile-ico') {
+  if (item && item.image) {
+    const src = item.image[0] === '/' || item.image.startsWith('http') ? item.image : '/' + item.image;
+    return `<img class="tile-photo" src="${src}" alt="${Fmt.escape(item.product_name || item.name || '')}" loading="lazy">`;
+  }
+  return productIcon(item, iconCls);
 }

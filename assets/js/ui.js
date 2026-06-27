@@ -174,7 +174,7 @@ const UI = {
     return `
     <article class="card reveal">
       <a href="/product/${p.slug}" class="card__media" style="${tileStyle(p.accent_color)}" aria-label="${Fmt.escape(p.name)}">
-        <span class="tile-emoji">${productIcon(p)}</span>
+        <span class="tile-emoji">${productThumb(p)}</span>
       </a>
       <div class="card__badges">${badges.join('')}</div>
       <button class="icon-btn card__wish ${wished ? 'active' : ''}" data-wish="${p.slug}" aria-label="Save to wishlist">${icons.heart}</button>
@@ -251,7 +251,7 @@ const Cart = {
 
     items.innerHTML = this.data.items.map(it => `
       <div class="cart-line">
-        <a href="/product/${it.slug}" class="cart-line__media" style="${tileStyle(it.accent_color)}">${productIcon(it, 'tile-ico tile-ico--sm')}</a>
+        <a href="/product/${it.slug}" class="cart-line__media" style="${tileStyle(it.accent_color)}">${productThumb(it, 'tile-ico tile-ico--sm')}</a>
         <div>
           <div class="cart-line__title">${Fmt.escape(it.product_name)}</div>
           <div class="cart-line__meta">${Fmt.escape(it.variant_name)} · ${Fmt.money(it.price)}</div>

@@ -93,7 +93,93 @@ final class AdminController
         $v = $pdo->prepare('SELECT * FROM product_variants WHERE product_id=? ORDER BY id');
         $v->execute([$product['id']]);
         $product['variants'] = $v->fetchAll();
+
+        $img = $pdo->prepare("SELECT id,path,alt_text,is_primary,sort_order FROM product_images WHERE product_id=? AND path LIKE 'uploads/%' ORDER BY is_primary DESC, sort_order, id");
+        $img->execute([$product['id']]);
+        $product['images'] = $img->fetchAll();
         Response::json($product);
+    }
+
+    /* ---------------- Product images ---------------- */
+    public function uploadImage(Request $req, array $p): void
+    {
+        $pid = (int) $p['id'];
+        $pdo = $this->db();
+        $exists = $pdo->prepare('SELECT name FROM products WHERE id=?');
+        $exists->execute([$pid]);
+        $pname = $exists->fetchColumn();
+        if ($pname === false) Response::error('NOT_FOUND', 'Product not found', 404);
+
+        if (empty($_FILES['image']) || ($_FILES['image']['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
+            Response::error('NO_FILE', 'Please choose an image to upload', 422);
+        }
+        $f = $_FILES['image'];
+        if ($f['size'] > 5 * 1024 * 1024) {
+            Response::error('TOO_LARGE', 'Image must be 5MB or smaller', 422);
+        }
+        $allowed = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp', 'image/gif' => 'gif'];
+        $mime = (new \finfo(FILEINFO_MIME_TYPE))->file($f['tmp_name']) ?: '';
+        if (!isset($allowed[$mime])) {
+            Response::error('BAD_TYPE', 'Only JPEG, PNG, WebP or GIF images are allowed', 422);
+        }
+
+        $dir = dirname(__DIR__, 2) . '/uploads/products';
+        if (!is_dir($dir) && !mkdir($dir, 0775, true) && !is_dir($dir)) {
+            Response::error('SAVE_FAILED', 'Upload directory is not writable', 500);
+        }
+        $name = $pid . '-' . bin2hex(random_bytes(6)) . '.' . $allowed[$mime];
+        $dest = $dir . '/' . $name;
+        if (!@move_uploaded_file($f['tmp_name'], $dest) && !@rename($f['tmp_name'], $dest)) {
+            Response::error('SAVE_FAILED', 'Could not save the image', 500);
+        }
+        @chmod($dest, 0644);
+        $path = 'uploads/products/' . $name;
+
+        $hasPrimary = $pdo->prepare("SELECT COUNT(*) FROM product_images WHERE product_id=? AND is_primary=1 AND path LIKE 'uploads/%'");
+        $hasPrimary->execute([$pid]);
+        $primary = ((int) $hasPrimary->fetchColumn() === 0) ? 1 : 0;
+        $sort = (int) $pdo->query("SELECT COALESCE(MAX(sort_order),0)+1 FROM product_images WHERE product_id=" . $pid)->fetchColumn();
+
+        $pdo->prepare('INSERT INTO product_images (product_id,path,alt_text,is_primary,sort_order) VALUES (?,?,?,?,?)')
+            ->execute([$pid, $path, $pname, $primary, $sort]);
+        Response::json(['id' => (int) $pdo->lastInsertId(), 'path' => $path, 'is_primary' => $primary], 201);
+    }
+
+    public function deleteImage(Request $req, array $p): void
+    {
+        $pdo = $this->db();
+        $stmt = $pdo->prepare('SELECT id,product_id,path,is_primary FROM product_images WHERE id=?');
+        $stmt->execute([(int) $p['id']]);
+        $img = $stmt->fetch();
+        if (!$img) Response::error('NOT_FOUND', 'Image not found', 404);
+
+        if (str_starts_with($img['path'], 'uploads/')) {
+            $file = dirname(__DIR__, 2) . '/' . $img['path'];
+            if (is_file($file)) @unlink($file);
+        }
+        $pdo->prepare('DELETE FROM product_images WHERE id=?')->execute([$img['id']]);
+
+        // Promote another uploaded image to primary if we removed the primary one.
+        if ((int) $img['is_primary'] === 1) {
+            $next = $pdo->prepare("SELECT id FROM product_images WHERE product_id=? AND path LIKE 'uploads/%' ORDER BY sort_order, id LIMIT 1");
+            $next->execute([$img['product_id']]);
+            $nid = $next->fetchColumn();
+            if ($nid) $pdo->prepare('UPDATE product_images SET is_primary=1 WHERE id=?')->execute([$nid]);
+        }
+        Response::json(['ok' => true]);
+    }
+
+    public function setPrimaryImage(Request $req, array $p): void
+    {
+        $pdo = $this->db();
+        $stmt = $pdo->prepare('SELECT product_id FROM product_images WHERE id=?');
+        $stmt->execute([(int) $p['id']]);
+        $productId = $stmt->fetchColumn();
+        if ($productId === false) Response::error('NOT_FOUND', 'Image not found', 404);
+
+        $pdo->prepare('UPDATE product_images SET is_primary=0 WHERE product_id=?')->execute([$productId]);
+        $pdo->prepare('UPDATE product_images SET is_primary=1 WHERE id=?')->execute([(int) $p['id']]);
+        Response::json(['ok' => true]);
     }
 
     public function createProduct(Request $req): void

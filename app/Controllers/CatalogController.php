@@ -70,7 +70,8 @@ final class CatalogController
                        c.name AS category_name, c.slug AS category_slug,
                        (SELECT MIN(price) FROM product_variants v WHERE v.product_id=p.id) AS min_price,
                        (SELECT MAX(compare_at_price) FROM product_variants v WHERE v.product_id=p.id) AS max_compare,
-                       (SELECT SUM(stock_qty) FROM product_variants v WHERE v.product_id=p.id) AS total_stock
+                       (SELECT SUM(stock_qty) FROM product_variants v WHERE v.product_id=p.id) AS total_stock,
+                       (SELECT path FROM product_images pi WHERE pi.product_id=p.id AND pi.path LIKE 'uploads/%' ORDER BY pi.is_primary DESC, pi.sort_order, pi.id LIMIT 1) AS image
                 FROM products p JOIN categories c ON c.id=p.category_id
                 WHERE $whereSql ORDER BY $sort LIMIT $perPage OFFSET $offset";
         $stmt = $pdo->prepare($sql);
@@ -100,7 +101,7 @@ final class CatalogController
         $variants = $pdo->prepare('SELECT id,sku,name,weight_grams,price,compare_at_price,stock_qty FROM product_variants WHERE product_id=? AND is_active=1 ORDER BY price');
         $variants->execute([$product['id']]);
 
-        $images = $pdo->prepare('SELECT path,alt_text,is_primary FROM product_images WHERE product_id=? ORDER BY sort_order');
+        $images = $pdo->prepare("SELECT path,alt_text,is_primary FROM product_images WHERE product_id=? AND path LIKE 'uploads/%' ORDER BY is_primary DESC, sort_order, id");
         $images->execute([$product['id']]);
 
         $reviews = $pdo->prepare('SELECT author_name,rating,title,body,created_at FROM reviews WHERE product_id=? AND is_approved=1 ORDER BY id DESC');
@@ -108,6 +109,7 @@ final class CatalogController
 
         $product['variants'] = $variants->fetchAll();
         $product['images'] = $images->fetchAll();
+        $product['image'] = $product['images'][0]['path'] ?? null;
         $product['reviews'] = $reviews->fetchAll();
         $product['is_organic'] = (bool) $product['is_organic'];
 
@@ -127,7 +129,8 @@ final class CatalogController
                        p.emoji,p.accent_color,p.badge,p.rating_avg,p.rating_count,
                        (SELECT MIN(price) FROM product_variants v WHERE v.product_id=p.id) AS min_price,
                        (SELECT MAX(compare_at_price) FROM product_variants v WHERE v.product_id=p.id) AS max_compare,
-                       (SELECT SUM(stock_qty) FROM product_variants v WHERE v.product_id=p.id) AS total_stock
+                       (SELECT SUM(stock_qty) FROM product_variants v WHERE v.product_id=p.id) AS total_stock,
+                       (SELECT path FROM product_images pi WHERE pi.product_id=p.id AND pi.path LIKE 'uploads/%' ORDER BY pi.is_primary DESC, pi.sort_order, pi.id LIMIT 1) AS image
                 FROM products p WHERE p.category_id=? AND p.slug<>? AND p.is_active=1
                 ORDER BY p.rating_count DESC LIMIT 4");
         $rel->execute([$catId, $params['slug']]);

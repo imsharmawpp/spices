@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <div id="cart-rows">
           ${d.items.map(it => `
             <div class="cart-row">
-              <a href="/product/${it.slug}" class="cart-row__media" style="${tileStyle(it.accent_color)}">${productIcon(it)}</a>
+              <a href="/product/${it.slug}" class="cart-row__media" style="${tileStyle(it.accent_color)}">${productThumb(it)}</a>
               <div>
                 <div style="font-weight:600">${Fmt.escape(it.product_name)}</div>
                 <div class="muted" style="font-size:.85rem">${Fmt.escape(it.brand)} · ${Fmt.escape(it.variant_name)}</div>

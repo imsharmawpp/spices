@@ -34,7 +34,7 @@ on the first API request if it doesn't exist. To reset, delete that file.
 ### Demo accounts & codes
 - **Customer:** `maya@example.com` / `password`
 - **Admin (role only):** `admin@saffra.test` / `admin123`
-- **Coupons:** `WELCOME10` (10% off) · `SAVE100` (₹100 off orders over ₹799)
+- **Coupons:** `WELCOME10` (10% off) · `SAVE5` ($5 off orders over $30)
 
 ---
 

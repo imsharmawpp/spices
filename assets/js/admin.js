@@ -100,6 +100,23 @@ const Admin = {
 
   /* ---------------- helpers ---------------- */
   async load(path) { return (await API.get(path)).data; },
+  async uploadFile(path, file) {
+    const fd = new FormData();
+    fd.append('image', file);
+    const res = await fetch('/api' + path, {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: window.__csrf ? { 'X-CSRF-Token': window.__csrf } : {},
+      body: fd,
+    });
+    let payload = null;
+    try { payload = await res.json(); } catch (_) {}
+    if (!res.ok) {
+      const err = (payload && payload.error) || { message: 'Upload failed' };
+      throw Object.assign(new Error(err.message), { details: err.details });
+    }
+    return payload;
+  },
   toast(msg, type) {
     const wrap = document.getElementById('toast-wrap');
     const t = document.createElement('div');
@@ -316,10 +333,10 @@ const Admin = {
           <div class="f"><label>Store name</label><input name="store_name" value="${h(s.store_name || '')}"></div>
           <div class="f"><label>Announcement bar</label><input name="announcement" value="${h(s.announcement || '')}"></div>
           <div class="f-row">
-            <div class="f"><label>Free shipping over (₹)</label><input name="free_shipping_threshold" type="number" step="1" value="${h(s.free_shipping_threshold || '')}"></div>
-            <div class="f"><label>Flat shipping (₹)</label><input name="flat_shipping" type="number" step="1" value="${h(s.flat_shipping || '')}"></div>
+            <div class="f"><label>Free shipping over ($)</label><input name="free_shipping_threshold" type="number" step="0.01" value="${h(s.free_shipping_threshold || '')}"></div>
+            <div class="f"><label>Flat shipping ($)</label><input name="flat_shipping" type="number" step="0.01" value="${h(s.flat_shipping || '')}"></div>
           </div>
-          <div class="f"><label>Tax rate (e.g. 0.05 = 5% GST)</label><input name="tax_rate" type="number" step="0.01" value="${h(s.tax_rate || '')}"></div>
+          <div class="f"><label>Tax rate (e.g. 0.08 = 8%)</label><input name="tax_rate" type="number" step="0.01" value="${h(s.tax_rate || '')}"></div>
           <button class="btn btn--primary">Save settings</button>
         </form>`;
       v.querySelector('#settings-form').onsubmit = async (e) => {
@@ -360,10 +377,16 @@ const Admin = {
           <label class="f-check"><input type="checkbox" name="is_bestseller" ${p.is_bestseller == 1 ? 'checked' : ''}> Bestseller</label>
           <label class="f-check"><input type="checkbox" name="is_organic" ${p.is_organic == 1 ? 'checked' : ''}> Organic</label>
         </div>
-        ${id ? `<h3 style="margin-top:8px">Variants</h3>
-          <div class="vrow head"><span>Size / name</span><span>Price ₹</span><span>Compare ₹</span><span>Stock</span><span></span></div>
+        ${id ? `<h3 style="margin-top:8px">Photos</h3>
+          <p class="muted" style="font-size:.82rem;margin-bottom:8px">Upload product photos (JPEG/PNG/WebP/GIF, up to 5MB). The starred one is the main image; products with no photo show the 3D icon.</p>
+          <div class="photo-grid" id="photo-grid">${this.photosHtml(p.images || [])}</div>
+          <label class="btn btn--light" style="margin-bottom:18px">
+            <input type="file" id="photo-input" accept="image/*" hidden> Upload photo
+          </label>
+          <h3 style="margin-top:8px">Variants</h3>
+          <div class="vrow head"><span>Size / name</span><span>Price</span><span>Compare</span><span>Stock</span><span></span></div>
           <div id="variants">${(p.variants || []).map(vr => this.variantRow(vr)).join('')}</div>
-          <button type="button" class="link-btn" id="add-variant">+ Add variant</button>` : '<p class="muted" style="font-size:.85rem">Save the product first, then add sizes/variants.</p>'}
+          <button type="button" class="link-btn" id="add-variant">+ Add variant</button>` : '<p class="muted" style="font-size:.85rem">Save the product first, then add photos and sizes/variants.</p>'}
       </form>`, `
       <button class="btn btn--light" id="m-cancel">Cancel</button>
       <button class="btn btn--primary" id="m-save">${id ? 'Save changes' : 'Create product'}</button>`);
@@ -373,6 +396,7 @@ const Admin = {
     if (id) {
       ov.querySelector('#add-variant').onclick = () => { ov.querySelector('#variants').insertAdjacentHTML('beforeend', this.variantRow({})); this.wireVariantRows(ov, id); };
       this.wireVariantRows(ov, id);
+      this.wirePhotos(ov, id);
     }
     ov.querySelector('#m-save').onclick = async () => {
       const form = ov.querySelector('#pform');
@@ -422,6 +446,50 @@ const Admin = {
     }
   },
 
+  /* ---------------- product photos ---------------- */
+  photosHtml(images) {
+    if (!images.length) return '<div class="photo-empty">No photos yet — the storefront will show the 3D icon.</div>';
+    return images.map(im => {
+      const src = (im.path[0] === '/' || im.path.startsWith('http')) ? im.path : '/' + im.path;
+      return `<div class="photo-cell ${im.is_primary == 1 ? 'primary' : ''}" data-img="${im.id}">
+        <img src="${src}" alt="">
+        ${im.is_primary == 1 ? '<span class="photo-badge">Main</span>' : `<button type="button" class="photo-star" data-primary="${im.id}" title="Set as main">☆</button>`}
+        <button type="button" class="photo-del" data-delimg="${im.id}" title="Delete">✕</button>
+      </div>`;
+    }).join('');
+  },
+  wirePhotos(ov, productId) {
+    const grid = ov.querySelector('#photo-grid');
+    const input = ov.querySelector('#photo-input');
+    const refresh = async () => {
+      const p = await this.load('/admin/products/' + productId);
+      grid.innerHTML = this.photosHtml(p.images || []);
+      bind();
+    };
+    const bind = () => {
+      grid.querySelectorAll('[data-delimg]').forEach(b => b.onclick = async () => {
+        if (!confirm('Delete this photo?')) return;
+        try { await API.del('/admin/images/' + b.dataset.delimg); await refresh(); this.toast('Photo deleted'); }
+        catch (e) { this.toast(e.message, 'error'); }
+      });
+      grid.querySelectorAll('[data-primary]').forEach(b => b.onclick = async () => {
+        try { await API.patch('/admin/images/' + b.dataset.primary + '/primary'); await refresh(); this.toast('Main photo set'); }
+        catch (e) { this.toast(e.message, 'error'); }
+      });
+    };
+    bind();
+    if (input) input.onchange = async () => {
+      const file = input.files[0];
+      if (!file) return;
+      const label = input.closest('label');
+      const original = label ? label.textContent : '';
+      if (label) label.textContent = 'Uploading…';
+      try { await this.uploadFile('/admin/products/' + productId + '/images', file); await refresh(); this.toast('Photo uploaded'); }
+      catch (e) { this.toast(e.message || 'Upload failed', 'error'); }
+      finally { input.value = ''; if (label) label.innerHTML = '<input type="file" id="photo-input" accept="image/*" hidden> Upload photo'; this.wirePhotos(ov, productId); }
+    };
+  },
+
   /* ---------------- Modals: category ---------------- */
   categoryModal(c) {
     const isEdit = !!c;
@@ -458,12 +526,12 @@ const Admin = {
       <form id="cpform">
         <div class="f"><label>Code</label><input name="code" value="${h(c.code)}" ${isEdit ? 'readonly' : ''} required><span class="err" data-err="code"></span></div>
         <div class="f-row">
-          <div class="f"><label>Type</label><select name="type"><option value="percent" ${c.type === 'percent' ? 'selected' : ''}>Percent %</option><option value="fixed" ${c.type === 'fixed' ? 'selected' : ''}>Fixed ₹</option></select></div>
+          <div class="f"><label>Type</label><select name="type"><option value="percent" ${c.type === 'percent' ? 'selected' : ''}>Percent %</option><option value="fixed" ${c.type === 'fixed' ? 'selected' : ''}>Fixed $</option></select></div>
           <div class="f"><label>Value</label><input name="value" type="number" step="0.01" value="${h(c.value)}"><span class="err" data-err="value"></span></div>
         </div>
         <div class="f-row">
-          <div class="f"><label>Min order (₹)</label><input name="min_order_total" type="number" step="1" value="${c.min_order_total != null ? h(c.min_order_total) : ''}"></div>
-          <div class="f"><label>Max discount (₹)</label><input name="max_discount" type="number" step="1" value="${c.max_discount != null ? h(c.max_discount) : ''}"></div>
+          <div class="f"><label>Min order ($)</label><input name="min_order_total" type="number" step="0.01" value="${c.min_order_total != null ? h(c.min_order_total) : ''}"></div>
+          <div class="f"><label>Max discount ($)</label><input name="max_discount" type="number" step="0.01" value="${c.max_discount != null ? h(c.max_discount) : ''}"></div>
         </div>
         <label class="f-check"><input type="checkbox" name="is_active" ${c.is_active == 1 ? 'checked' : ''}> Active</label>
       </form>`, `<button class="btn btn--light" id="m-cancel">Cancel</button><button class="btn btn--primary" id="m-save">${isEdit ? 'Save' : 'Create'}</button>`);
