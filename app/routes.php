@@ -20,6 +20,7 @@ $misc = new MiscController();
 
 // Storefront — catalog
 $router->get('/api/settings', [$misc, 'settings']);
+$router->get('/api/currency', [$misc, 'currency']);
 $router->get('/api/categories', [$catalog, 'categories']);
 $router->get('/api/products', [$catalog, 'products']);
 $router->get('/api/products/{slug}/related', [$catalog, 'related']);

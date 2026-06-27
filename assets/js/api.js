@@ -25,18 +25,73 @@ const API = {
 
 // ---- formatting helpers ----
 const Fmt = {
-  symbol: '$',
-  money(n) {
-    const v = Number(n || 0);
-    const num = v.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    return this.symbol + num;
-  },
+  symbol: '₹',
+  money(n) { return Currency.format(Number(n || 0)); },
   stars(rating) {
     const full = Math.round(Number(rating) || 0);
     return '★★★★★'.slice(0, full) + '☆☆☆☆☆'.slice(0, 5 - full);
   },
   escape(s) {
     return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  },
+};
+
+// ---- Multi-currency display layer ----
+// Base/store currency is INR. Prices from the API are in INR; we convert them
+// for display using live rates (frankfurter.dev) and the visitor's currency.
+// Conversion is display-only — orders are processed in INR.
+const Currency = {
+  base: 'INR',
+  display: 'INR',
+  detected: 'INR',
+  rates: { INR: 1 },
+  supported: [{ code: 'INR', name: 'Indian Rupee' }],
+  _p: null,
+
+  ensure() { if (!this._p) this._p = this.load(); return this._p; },
+
+  async load() {
+    try {
+      const d = (await API.get('/currency')).data;
+      this.base = d.base || 'INR';
+      this.rates = d.rates || { INR: 1 };
+      this.detected = d.detected || 'INR';
+      this.supported = d.supported || this.supported;
+      const saved = localStorage.getItem('display_currency');
+      this.display = (saved && this.rates[saved]) ? saved
+        : (this.rates[this.detected] ? this.detected : this.base);
+    } catch (_) { this.display = 'INR'; }
+  },
+
+  set(code) {
+    if (this.rates[code]) { this.display = code; localStorage.setItem('display_currency', code); }
+  },
+
+  convert(amountBase) { return Number(amountBase || 0) * (this.rates[this.display] || 1); },
+
+  format(amountBase) {
+    const v = this.convert(amountBase);
+    try {
+      return new Intl.NumberFormat(undefined, { style: 'currency', currency: this.display, currencyDisplay: 'narrowSymbol' }).format(v);
+    } catch (_) {
+      try { return new Intl.NumberFormat(undefined, { style: 'currency', currency: this.display }).format(v); }
+      catch (e) { return (this.display === 'INR' ? '₹' : '') + v.toFixed(2); }
+    }
+  },
+
+  isConverted() { return this.display !== this.base; },
+
+  // Disclaimer text shown when displaying a non-base currency (orders charge in INR).
+  note(amountBase) {
+    if (!this.isConverted()) return '';
+    let inr;
+    try { inr = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', currencyDisplay: 'narrowSymbol' }).format(Number(amountBase || 0)); }
+    catch (_) { inr = '₹' + Number(amountBase || 0).toFixed(2); }
+    return `Prices shown in ${this.display}. You'll be charged in INR (${inr}).`;
+  },
+
+  hydrate(root = document) {
+    root.querySelectorAll('[data-money]').forEach(el => { el.textContent = this.format(parseFloat(el.dataset.money || '0')); });
   },
 };
 

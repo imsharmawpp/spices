@@ -20,6 +20,11 @@ final class MiscController
         ]);
     }
 
+    public function currency(Request $req): void
+    {
+        Response::json(\App\Services\CurrencyService::payload());
+    }
+
     public function newsletter(Request $req): void
     {
         $email = strtolower(trim((string) $req->input('email', '')));

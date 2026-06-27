@@ -24,11 +24,12 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="summary-row"><span>Subtotal</span><span>${Fmt.money(d.subtotal)}</span></div>
       <div class="summary-row"><span>Shipping</span><span>${d.shipping_total > 0 ? Fmt.money(d.shipping_total) : 'Free'}</span></div>
       <div class="summary-row"><span>Tax</span><span>${Fmt.money(d.tax_total)}</span></div>
-      <div class="summary-row total" style="margin-top:8px"><span>Total</span><span>${Fmt.money(d.grand_total)}</span></div>`;
+      <div class="summary-row total" style="margin-top:8px"><span>Total</span><span>${Fmt.money(d.grand_total)}</span></div>
+      ${Currency.isConverted() ? `<p class="cur-note">${Currency.note(d.grand_total)}</p>` : ''}`;
   }
 
   document.addEventListener('cart:update', renderSummary);
-  setTimeout(renderSummary, 250);
+  Currency.ensure().then(renderSummary);
 
   const form = document.getElementById('checkout-form');
   form.addEventListener('submit', async (e) => {

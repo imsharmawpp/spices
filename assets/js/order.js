@@ -2,6 +2,7 @@
 document.addEventListener('DOMContentLoaded', async () => {
   const root = document.getElementById('order-root');
   if (!root) return;
+  await Currency.ensure();
   const params = new URLSearchParams(location.search);
   const num = params.get('n');
   const isNew = params.get('new') === '1';

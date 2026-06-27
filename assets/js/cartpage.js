@@ -42,6 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="summary-row"><span>Tax</span><span>${Fmt.money(d.tax_total)}</span></div>
         <hr style="border:none;border-top:1px solid var(--color-border);margin:12px 0">
         <div class="summary-row total"><span>Total</span><span>${Fmt.money(d.grand_total)}</span></div>
+        ${Currency.isConverted() ? `<p class="cur-note">${Currency.note(d.grand_total)}</p>` : ''}
         <a class="btn btn--primary btn--block btn--lg" href="/checkout" style="margin-top:16px">Proceed to checkout</a>
         ${d.subtotal < d.free_shipping_threshold ? `<p class="note" style="margin-top:12px">Add ${Fmt.money(d.free_shipping_threshold - d.subtotal)} more for free shipping 🚚</p>` : ''}
       </div>`;
@@ -60,6 +61,6 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   document.addEventListener('cart:update', render);
-  // Initial (Cart.refresh in UI.init may finish after this; render now + on update)
-  setTimeout(render, 250);
+  // Initial render once currency rates are ready (Cart.refresh in ui.js also fires cart:update)
+  Currency.ensure().then(render);
 });

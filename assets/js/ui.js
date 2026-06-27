@@ -25,14 +25,24 @@ const UI = {
 
   async init() {
     try { this.settings = (await API.get('/settings')).data; } catch (_) {}
-    if (this.settings.currency_symbol) Fmt.symbol = this.settings.currency_symbol;
+    await Currency.ensure();
     try { this.me = (await API.get('/auth/me')).data; } catch (_) { this.me = null; }
     this.renderChrome();
+    this.initCurrencySwitcher();
+    Currency.hydrate(document);
     await Cart.refresh();
     this.bind();
     Icons.hydrate();
     this.setFavicon();
     Anim.init();
+  },
+
+  initCurrencySwitcher() {
+    const sel = document.getElementById('cur-select');
+    if (!sel) return;
+    sel.innerHTML = Currency.supported.map(c => `<option value="${c.code}" ${c.code === Currency.display ? 'selected' : ''}>${c.code}</option>`).join('');
+    sel.title = (Currency.supported.find(c => c.code === Currency.display) || {}).name || 'Currency';
+    sel.onchange = () => { Currency.set(sel.value); location.reload(); };
   },
 
   setFavicon() {
@@ -57,6 +67,7 @@ const UI = {
           <nav class="nav-primary">${NAV.map(n => `<a href="${n.href}">${n.label}</a>`).join('')}</nav>
           <a class="brand" href="/">Saffra<span>.</span></a>
           <div class="header-actions">
+            <select class="cur-select" id="cur-select" aria-label="Display currency"></select>
             <button class="icon-btn" aria-label="Search" data-action="toggle-search">${icons.search}</button>
             <a class="icon-btn" aria-label="Account" href="/account">${icons.user}</a>
             <a class="icon-btn" aria-label="Wishlist" href="/shop">${icons.heart}</a>
@@ -273,6 +284,7 @@ const Cart = {
       <div class="summary-row"><span>Subtotal</span><span>${Fmt.money(d.subtotal)}</span></div>
       <div class="summary-row"><span>Shipping</span><span>${d.shipping_total > 0 ? Fmt.money(d.shipping_total) : 'Free'}</span></div>
       <div class="summary-row total"><span>Total</span><span>${Fmt.money(d.grand_total)}</span></div>
+      ${Currency.isConverted() ? `<p class="cur-note">${Currency.note(d.grand_total)}</p>` : ''}
       <a class="btn btn--primary btn--block btn--lg" href="/checkout">Checkout</a>
       <a class="btn btn--light btn--block" href="/cart">View cart</a>`;
 

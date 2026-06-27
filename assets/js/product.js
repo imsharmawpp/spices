@@ -2,6 +2,7 @@
 document.addEventListener('DOMContentLoaded', async () => {
   const root = document.getElementById('pdp-root');
   if (!root) return;
+  await Currency.ensure();
   const slug = location.pathname.split('/').pop();
 
   let product;

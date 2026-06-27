@@ -110,39 +110,117 @@ final class AdminController
         $pname = $exists->fetchColumn();
         if ($pname === false) Response::error('NOT_FOUND', 'Product not found', 404);
 
-        if (empty($_FILES['image']) || ($_FILES['image']['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
-            Response::error('NO_FILE', 'Please choose an image to upload', 422);
-        }
-        $f = $_FILES['image'];
-        if ($f['size'] > 5 * 1024 * 1024) {
-            Response::error('TOO_LARGE', 'Image must be 5MB or smaller', 422);
-        }
-        $allowed = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp', 'image/gif' => 'gif'];
-        $mime = (new \finfo(FILEINFO_MIME_TYPE))->file($f['tmp_name']) ?: '';
-        if (!isset($allowed[$mime])) {
-            Response::error('BAD_TYPE', 'Only JPEG, PNG, WebP or GIF images are allowed', 422);
+        $files = $this->collectFiles();
+        if (!$files) {
+            Response::error('NO_FILE', 'Please choose one or more images to upload', 422);
         }
 
         $dir = dirname(__DIR__, 2) . '/uploads/products';
         if (!is_dir($dir) && !mkdir($dir, 0775, true) && !is_dir($dir)) {
             Response::error('SAVE_FAILED', 'Upload directory is not writable', 500);
         }
-        $name = $pid . '-' . bin2hex(random_bytes(6)) . '.' . $allowed[$mime];
-        $dest = $dir . '/' . $name;
-        if (!@move_uploaded_file($f['tmp_name'], $dest) && !@rename($f['tmp_name'], $dest)) {
-            Response::error('SAVE_FAILED', 'Could not save the image', 500);
+
+        $allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+        $saved = [];
+        $errors = [];
+
+        foreach ($files as $f) {
+            if (($f['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) { $errors[] = ($f['name'] ?? 'file') . ': upload error'; continue; }
+            if ($f['size'] > 5 * 1024 * 1024) { $errors[] = $f['name'] . ': larger than 5MB'; continue; }
+            $mime = (new \finfo(FILEINFO_MIME_TYPE))->file($f['tmp_name']) ?: '';
+            if (!in_array($mime, $allowed, true)) { $errors[] = $f['name'] . ': unsupported type'; continue; }
+
+            $rel = $this->storeImage($f['tmp_name'], $mime, $dir, $pid);
+            if (!$rel) { $errors[] = $f['name'] . ': could not process'; continue; }
+
+            $hasPrimary = $pdo->prepare("SELECT COUNT(*) FROM product_images WHERE product_id=? AND is_primary=1 AND path LIKE 'uploads/%'");
+            $hasPrimary->execute([$pid]);
+            $primary = ((int) $hasPrimary->fetchColumn() === 0) ? 1 : 0;
+            $sort = (int) $pdo->query('SELECT COALESCE(MAX(sort_order),0)+1 FROM product_images WHERE product_id=' . $pid)->fetchColumn();
+            $pdo->prepare('INSERT INTO product_images (product_id,path,alt_text,is_primary,sort_order) VALUES (?,?,?,?,?)')
+                ->execute([$pid, $rel, $pname, $primary, $sort]);
+            $saved[] = ['id' => (int) $pdo->lastInsertId(), 'path' => $rel, 'is_primary' => $primary];
         }
+
+        if (!$saved) {
+            Response::error('UPLOAD_FAILED', 'No images uploaded: ' . implode('; ', $errors), 422);
+        }
+        Response::json(['uploaded' => count($saved), 'images' => $saved, 'errors' => $errors], 201);
+    }
+
+    /** Normalize $_FILES['images'][] (bulk) and $_FILES['image'] (single) into a flat list. */
+    private function collectFiles(): array
+    {
+        $out = [];
+        if (!empty($_FILES['images']) && is_array($_FILES['images']['name'])) {
+            $n = count($_FILES['images']['name']);
+            for ($i = 0; $i < $n; $i++) {
+                if (($_FILES['images']['name'][$i] ?? '') === '') continue;
+                $out[] = [
+                    'name' => $_FILES['images']['name'][$i],
+                    'tmp_name' => $_FILES['images']['tmp_name'][$i],
+                    'size' => $_FILES['images']['size'][$i],
+                    'error' => $_FILES['images']['error'][$i],
+                ];
+            }
+        }
+        if (!empty($_FILES['image']) && ($_FILES['image']['name'] ?? '') !== '') {
+            $out[] = $_FILES['image'];
+        }
+        return $out;
+    }
+
+    /**
+     * Resize (max 1200px) and convert raster images to WebP to keep files small.
+     * Animated GIFs are stored as-is to preserve animation. Falls back to the
+     * original encoding if GD/WebP is unavailable.
+     */
+    private function storeImage(string $tmp, string $mime, string $dir, int $pid): ?string
+    {
+        $base = $pid . '-' . bin2hex(random_bytes(6));
+
+        // GIFs: keep original (preserve animation).
+        if ($mime === 'image/gif' || !function_exists('imagecreatetruecolor')) {
+            $ext = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp', 'image/gif' => 'gif'][$mime] ?? 'jpg';
+            $dest = $dir . '/' . $base . '.' . $ext;
+            if (!@move_uploaded_file($tmp, $dest) && !@copy($tmp, $dest)) return null;
+            @chmod($dest, 0644);
+            return 'uploads/products/' . $base . '.' . $ext;
+        }
+
+        $src = match ($mime) {
+            'image/jpeg' => @imagecreatefromjpeg($tmp),
+            'image/png'  => @imagecreatefrompng($tmp),
+            'image/webp' => @imagecreatefromwebp($tmp),
+            default      => false,
+        };
+        if (!$src) return null;
+
+        $w = imagesx($src);
+        $h = imagesy($src);
+        $max = 1200;
+        $scale = min(1, $max / max($w, $h));
+        $nw = max(1, (int) round($w * $scale));
+        $nh = max(1, (int) round($h * $scale));
+
+        $dst = imagecreatetruecolor($nw, $nh);
+        // Preserve transparency for PNG/WebP sources.
+        imagealphablending($dst, false);
+        imagesavealpha($dst, true);
+        $transparent = imagecolorallocatealpha($dst, 0, 0, 0, 127);
+        imagefill($dst, 0, 0, $transparent);
+        imagecopyresampled($dst, $src, 0, 0, 0, 0, $nw, $nh, $w, $h);
+
+        $useWebp = function_exists('imagewebp');
+        $ext = $useWebp ? 'webp' : 'jpg';
+        $dest = $dir . '/' . $base . '.' . $ext;
+        $ok = $useWebp ? @imagewebp($dst, $dest, 82) : @imagejpeg($dst, $dest, 86);
+
+        imagedestroy($src);
+        imagedestroy($dst);
+        if (!$ok) return null;
         @chmod($dest, 0644);
-        $path = 'uploads/products/' . $name;
-
-        $hasPrimary = $pdo->prepare("SELECT COUNT(*) FROM product_images WHERE product_id=? AND is_primary=1 AND path LIKE 'uploads/%'");
-        $hasPrimary->execute([$pid]);
-        $primary = ((int) $hasPrimary->fetchColumn() === 0) ? 1 : 0;
-        $sort = (int) $pdo->query("SELECT COALESCE(MAX(sort_order),0)+1 FROM product_images WHERE product_id=" . $pid)->fetchColumn();
-
-        $pdo->prepare('INSERT INTO product_images (product_id,path,alt_text,is_primary,sort_order) VALUES (?,?,?,?,?)')
-            ->execute([$pid, $path, $pname, $primary, $sort]);
-        Response::json(['id' => (int) $pdo->lastInsertId(), 'path' => $path, 'is_primary' => $primary], 201);
+        return 'uploads/products/' . $base . '.' . $ext;
     }
 
     public function deleteImage(Request $req, array $p): void

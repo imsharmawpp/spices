@@ -2,6 +2,7 @@
 document.addEventListener('DOMContentLoaded', async () => {
   const root = document.getElementById('account-root');
   if (!root) return;
+  await Currency.ensure();
 
   async function refresh() {
     let me = null;

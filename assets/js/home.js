@@ -1,5 +1,6 @@
 // Home page — bestsellers, categories, new arrivals, UGC. See docs/08 §4.1.
 document.addEventListener('DOMContentLoaded', async () => {
+  await Currency.ensure();
   // Categories
   try {
     const cats = (await API.get('/categories')).data;

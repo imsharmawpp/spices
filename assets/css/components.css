@@ -198,3 +198,16 @@
 .pdp__thumbs button .tile-photo { width: 100%; height: 100%; border-radius: var(--radius-sm); }
 .cart-line__media .tile-photo, .cart-row__media .tile-photo { border-radius: var(--radius-sm); }
 .row-ico .tile-photo { border-radius: 8px; }
+
+
+/* ---- Currency switcher + conversion note ---- */
+.cur-select {
+  appearance: none; border: 1px solid var(--color-border); background: #fff;
+  border-radius: var(--radius-pill); padding: 7px 26px 7px 12px; font-size: var(--fs-sm);
+  font-weight: 600; color: var(--color-text); cursor: pointer; transition: border-color var(--transition);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%238A7F70' stroke-width='1.6' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 10px center;
+}
+.cur-select:hover { border-color: var(--color-primary); }
+.cur-note { font-size: var(--fs-xs); color: var(--color-muted); margin-top: 8px; line-height: 1.5; }
+@media (max-width: 900px) { .cur-select { padding: 6px 24px 6px 10px; } }

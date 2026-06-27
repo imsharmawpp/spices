@@ -2,6 +2,7 @@
 document.addEventListener('DOMContentLoaded', async () => {
   const grid = document.getElementById('shop-grid');
   if (!grid) return;
+  await Currency.ensure();
 
   const state = { category: '', q: '', organic: '', form: '', sort: 'popular', page: 1 };
 
