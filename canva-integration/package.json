@@ -11,6 +11,8 @@
     "auth:url": "node src/authUrl.js",
     "auth:token": "node src/exchangeCode.js",
     "auth:status": "node src/status.js",
+    "templates": "node src/listTemplates.js",
+    "dataset": "node src/templateDataset.js",
     "generate": "node src/generateImages.js"
   }
 }

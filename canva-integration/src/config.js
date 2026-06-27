@@ -57,7 +57,7 @@ export const config = {
   get scopes() {
     return (
       process.env.CANVA_SCOPES ||
-      "design:content:read design:content:write design:meta:read asset:read asset:write profile:read"
+      "design:content:read design:content:write design:meta:read asset:read asset:write profile:read brandtemplate:meta:read brandtemplate:content:read"
     );
   },
   get generateMode() {

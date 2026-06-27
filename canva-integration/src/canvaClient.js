@@ -43,6 +43,23 @@ export async function getCurrentUser() {
   return api("/users/me");
 }
 
+/** List the user's brand templates (optionally filter to those with datasets). */
+export async function listBrandTemplates({ query, ownership, dataset } = {}) {
+  const qs = new URLSearchParams();
+  if (query) qs.set("query", query);
+  if (ownership) qs.set("ownership", ownership);
+  if (dataset) qs.set("dataset", dataset);
+  const suffix = qs.toString() ? `?${qs.toString()}` : "";
+  const data = await api(`/brand-templates${suffix}`);
+  return data.items ?? [];
+}
+
+/** Get a brand template's autofillable dataset definition (field name -> type). */
+export async function getBrandTemplateDataset(brandTemplateId) {
+  const data = await api(`/brand-templates/${brandTemplateId}/dataset`);
+  return data.dataset ?? {};
+}
+
 /** Upload a local file as an asset; returns the asset object. */
 export async function uploadAsset(filePath, name) {
   const token = await getValidAccessToken();
