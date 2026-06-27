@@ -38,6 +38,7 @@ const UI = {
     const header = document.createElement('div');
     header.innerHTML = `
       <a class="skip-link" href="#main">Skip to content</a>
+      <div class="scroll-progress" id="scroll-progress" aria-hidden="true"></div>
       <div class="announce">${Fmt.escape(this.settings.announcement || 'Freshly ground to order')}</div>
       <header class="site-header">
         <div class="container header-bar">
@@ -294,6 +295,10 @@ const Anim = {
     this.observeReveals();
     this.headerScroll();
     this.heroParallax();
+    this.scrollProgress();
+    this.counters();
+    this.spotlight();
+    this.wordRotator();
     if (!this.reduced) this.magnetic();
   },
 
@@ -379,6 +384,77 @@ const Anim = {
     document.body.addEventListener('mouseout', (e) => {
       const btn = e.target.closest('.btn--lg, .icon-btn');
       if (btn) btn.style.transform = '';
+    });
+  },
+
+  // Top scroll-progress indicator.
+  scrollProgress() {
+    const bar = document.getElementById('scroll-progress');
+    if (!bar) return;
+    const update = () => {
+      const h = document.documentElement.scrollHeight - window.innerHeight;
+      bar.style.width = (h > 0 ? (window.scrollY / h) * 100 : 0) + '%';
+    };
+    update();
+    window.addEventListener('scroll', update, { passive: true });
+  },
+
+  // Count-up animated numbers ([data-count], optional data-suffix / data-dec).
+  counters() {
+    const els = document.querySelectorAll('[data-count]');
+    if (!els.length) return;
+    if (this.reduced || !('IntersectionObserver' in window)) {
+      els.forEach(el => this.setCount(el, parseFloat(el.dataset.count)));
+      return;
+    }
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if (e.isIntersecting) { this.countUp(e.target); io.unobserve(e.target); } });
+    }, { threshold: 0.4 });
+    els.forEach(el => io.observe(el));
+  },
+  setCount(el, val) {
+    const dec = el.dataset.dec ? parseInt(el.dataset.dec, 10) : 0;
+    el.textContent = (dec ? val.toFixed(dec) : Math.round(val).toLocaleString('en-IN')) + (el.dataset.suffix || '');
+  },
+  countUp(el) {
+    const target = parseFloat(el.dataset.count);
+    const dur = 1500, start = performance.now();
+    const tick = (now) => {
+      const p = Math.min(1, (now - start) / dur);
+      const eased = 1 - Math.pow(1 - p, 3);
+      this.setCount(el, target * eased);
+      if (p < 1) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  },
+
+  // Cursor spotlight inside bento grids.
+  spotlight() {
+    if (this.reduced) return;
+    document.querySelectorAll('.bento').forEach(grid => {
+      grid.addEventListener('mousemove', (e) => {
+        const cell = e.target.closest('.bento__cell');
+        if (!cell) return;
+        const r = cell.getBoundingClientRect();
+        cell.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+        cell.style.setProperty('--my', (e.clientY - r.top) + 'px');
+      });
+    });
+  },
+
+  // Rotating kinetic word(s).
+  wordRotator() {
+    document.querySelectorAll('.rotator').forEach(r => {
+      const items = Array.from(r.children);
+      if (!items.length) return;
+      items[0].classList.add('active');
+      if (this.reduced || items.length < 2) return;
+      let i = 0;
+      setInterval(() => {
+        items[i].classList.remove('active');
+        i = (i + 1) % items.length;
+        items[i].classList.add('active');
+      }, 2300);
     });
   },
 };
