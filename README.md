@@ -83,11 +83,28 @@ spices/
 └── composer.json         # PSR-4 autoload + helper scripts
 ```
 
-## Switching to MySQL (production)
+## Deploying to live hosting (Hostinger / shared / WordPress plan)
 
-Set `DB_DRIVER=mysql` and the `DB_*` values in `.env`, then create the schema from
-the MySQL DDL in [docs/04-database-schema.md](docs/04-database-schema.md). The
-application code is driver-agnostic (PDO).
+No VPS or SSH required — deploy with File Manager + phpMyAdmin. Full step-by-step
+in **[DEPLOY.md](DEPLOY.md)**. In short:
+
+1. **Import** `database/spices_mysql.sql` into your MySQL database via phpMyAdmin.
+2. **Upload** the contents of `public/` to your web root, and `app/` + `database/`
+   + `storage/` one level above it.
+3. **Create `.env`** (above the web root) with your DB credentials and `DB_DRIVER=mysql`.
+4. The bundled `.htaccess` handles clean URLs and protects backend folders.
+
+> Recommended: host on a domain or **sub-domain root** so asset/API paths resolve cleanly.
+
+## Switching to MySQL
+
+Set `DB_DRIVER=mysql` and the `DB_*` values in `.env`. The app is driver-agnostic
+(PDO). Two ways to create the schema:
+- **phpMyAdmin import:** `database/spices_mysql.sql` (schema + demo catalogue) — best for shared hosting.
+- **CLI (if available):** `php database/migrate.php` (uses `database/schema.mysql.sql`).
+
+`DB_FALLBACK_SQLITE=true` lets the app fall back to SQLite when MySQL is
+unreachable (useful locally); set it to `false` in production.
 
 ## Notes & next steps
 - Payments are mocked for the demo; integrate a real gateway + webhook (see [docs/05 §2.5](docs/05-api-spec.md)).

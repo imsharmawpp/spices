@@ -4,8 +4,10 @@ declare(strict_types=1);
 /**
  * Front controller for the Saffra Spices store.
  * - Serves the JSON API under /api/*
- * - Lets the PHP dev server serve static assets directly
- * - Falls back to serving the matching storefront HTML page (clean URLs)
+ * - On Apache shared hosting (e.g. Hostinger WordPress plan), .htaccess rewrites
+ *   all non-file requests here; static files are served directly by Apache.
+ * - On the PHP dev server, it also passes through real static files.
+ * - Falls back to serving the matching storefront HTML page (clean URLs).
  */
 
 use App\Core\Database;
@@ -23,6 +25,13 @@ Env::load($root . '/.env.example'); // sensible defaults if .env is absent
 
 $path = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
 
+// Optional sub-folder support: set APP_BASE=/your-subfolder in .env.
+// (Recommended deployment is a domain or sub-domain root, where APP_BASE is empty.)
+$base = rtrim((string) Env::get('APP_BASE', ''), '/');
+if ($base !== '' && str_starts_with($path, $base)) {
+    $path = substr($path, strlen($base)) ?: '/';
+}
+
 // Let the built-in server handle real static files (assets, html).
 if (php_sapi_name() === 'cli-server' && $path !== '/' && is_file(__DIR__ . $path)) {
     return false;
@@ -33,8 +42,11 @@ if (str_starts_with($path, '/api')) {
     error_reporting(E_ALL);
     ini_set('display_errors', Env::bool('APP_DEBUG', false) ? '1' : '0');
 
-    // Auto-create + seed the SQLite database on first run (demo convenience).
-    if (Database::driver() === 'sqlite' && !is_file(Database::sqlitePath())) {
+    // Auto-create + seed the database on first run (demo convenience).
+    // Check existence BEFORE connecting (connecting would create the SQLite file).
+    $needsSeed = (Database::configuredDriver() === 'sqlite' || Env::bool('DB_FALLBACK_SQLITE', false))
+        && !is_file(Database::sqlitePath());
+    if ($needsSeed && Database::driver() === 'sqlite') {
         ob_start();
         require $root . '/database/migrate.php';
         ob_end_clean();

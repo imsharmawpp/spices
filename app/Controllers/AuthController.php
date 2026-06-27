@@ -82,13 +82,20 @@ final class AuthController
             if (!$userCartId) {
                 $pdo->prepare('UPDATE carts SET user_id=? WHERE id=?')->execute([$userId, $guestCartId]);
             } else {
-                // Move items from guest cart into the user cart.
+                // Move items from guest cart into the user cart (driver-agnostic upsert).
                 $items = $pdo->prepare('SELECT variant_id, quantity FROM cart_items WHERE cart_id=?');
                 $items->execute([$guestCartId]);
                 foreach ($items->fetchAll() as $it) {
-                    $pdo->prepare('INSERT INTO cart_items (cart_id,variant_id,quantity) VALUES (?,?,?)
-                        ON CONFLICT(cart_id,variant_id) DO UPDATE SET quantity=quantity+excluded.quantity')
-                        ->execute([$userCartId, $it['variant_id'], $it['quantity']]);
+                    $find = $pdo->prepare('SELECT id, quantity FROM cart_items WHERE cart_id=? AND variant_id=?');
+                    $find->execute([$userCartId, $it['variant_id']]);
+                    $existing = $find->fetch();
+                    if ($existing) {
+                        $pdo->prepare('UPDATE cart_items SET quantity=? WHERE id=?')
+                            ->execute([(int) $existing['quantity'] + (int) $it['quantity'], $existing['id']]);
+                    } else {
+                        $pdo->prepare('INSERT INTO cart_items (cart_id,variant_id,quantity) VALUES (?,?,?)')
+                            ->execute([$userCartId, $it['variant_id'], $it['quantity']]);
+                    }
                 }
                 $pdo->prepare('DELETE FROM carts WHERE id=?')->execute([$guestCartId]);
                 $_SESSION['cart_id'] = (int) $userCartId;

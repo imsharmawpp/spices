@@ -19,10 +19,17 @@ Env::load(__DIR__ . '/../.env.example'); // fallback defaults
 function run_migration(): void
 {
     $pdo = Database::connection();
-    $driver = Database::driver();
+    $driver = Database::driver(); // effective driver (after any fallback)
 
-    if ($driver !== 'sqlite') {
-        fwrite(STDERR, "This seeder targets SQLite. For MySQL, use docs/04-database-schema.md DDL.\n");
+    if ($driver === 'mysql') {
+        $sql = file_get_contents(__DIR__ . '/schema.mysql.sql');
+        foreach (array_filter(array_map('trim', explode(';', $sql))) as $stmt) {
+            if ($stmt !== '') {
+                $pdo->exec($stmt);
+            }
+        }
+        seed($pdo);
+        echo (PHP_SAPI === 'cli') ? "MySQL database migrated and seeded successfully.\n" : '';
         return;
     }
 
@@ -54,7 +61,7 @@ function seed(PDO $pdo): void
         'tax_rate' => '0.08',
         'announcement' => 'Free shipping on orders over $49 · Freshly ground to order',
     ];
-    $stmt = $pdo->prepare('INSERT INTO settings (key, value) VALUES (?, ?)');
+    $stmt = $pdo->prepare('INSERT INTO settings (`key`, value) VALUES (?, ?)');
     foreach ($settings as $k => $v) {
         $stmt->execute([$k, $v]);
     }

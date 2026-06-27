@@ -12,7 +12,7 @@ final class Settings
     public static function get(string $key, string $default = ''): string
     {
         if (!self::$cache) {
-            $rows = Database::connection()->query('SELECT key, value FROM settings')->fetchAll();
+            $rows = Database::connection()->query('SELECT `key`, value FROM settings')->fetchAll();
             foreach ($rows as $row) {
                 self::$cache[$row['key']] = $row['value'];
             }

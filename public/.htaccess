@@ -1,0 +1,41 @@
+# Saffra Spices — Apache config for shared / WordPress hosting (e.g. Hostinger).
+# This file lives in the web root (the folder that contains index.php).
+
+DirectoryIndex index.php index.html
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # If you deploy inside a sub-folder, uncomment and set this (and APP_BASE in .env):
+    # RewriteBase /your-subfolder/
+
+    # Serve existing files and directories directly (assets, html, etc.)
+    RewriteCond %{REQUEST_FILENAME} -f [OR]
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^ - [L]
+
+    # Everything else goes through the front controller (clean URLs + API)
+    RewriteRule ^ index.php [L]
+</IfModule>
+
+# Never serve dotfiles (e.g. a stray .env) from the web root
+<FilesMatch "^\.">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+# Light caching for static assets
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType text/css "access plus 7 days"
+    ExpiresByType application/javascript "access plus 7 days"
+    ExpiresByType image/svg+xml "access plus 7 days"
+</IfModule>
+
+# Force UTF-8 so emoji tiles render
+AddDefaultCharset utf-8
