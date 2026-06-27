@@ -17,21 +17,27 @@
 <body>
 <main id="main">
 
-  <!-- Hero -->
-  <section class="hero">
+  <!-- Hero slider (brand slide + one per category, built in home.js) -->
+  <section class="hero hero-slider" id="hero">
     <div class="aurora" aria-hidden="true"><span></span><span></span><span></span></div>
-    <div class="hero__art-float" aria-hidden="true"><i data-icon="leaf" data-color="#7CBB4E"></i></div>
-    <div class="hero__inner">
-      <div class="hero__content">
-        <span class="eyebrow">Single-origin · Small batch</span>
-        <h1>Spices That Tell a Story</h1>
-        <p>From quiet morning chai to unforgettable feasts, our spices are sourced at origin and ground fresh to order — so every pinch sings.</p>
-        <div class="hero__cta">
-          <a class="btn btn--primary btn--lg" href="/shop">Shop the collection</a>
-          <a class="btn btn--light btn--lg" href="/shop/gift-sets">Explore gift sets</a>
+    <div class="hero__slides" id="hero-slides">
+      <div class="hero__slide is-active">
+        <div class="hero__inner">
+          <div class="hero__content">
+            <span class="eyebrow">Single-origin · Small batch</span>
+            <h1>Spices That Tell a Story</h1>
+            <p>From quiet morning chai to unforgettable feasts, our spices are sourced at origin and ground fresh to order — so every pinch sings.</p>
+            <div class="hero__cta">
+              <a class="btn btn--primary btn--lg" href="/shop">Shop the collection</a>
+              <a class="btn btn--light btn--lg" href="/shop/gift-sets">Explore gift sets</a>
+            </div>
+          </div>
         </div>
       </div>
     </div>
+    <button class="hero__nav prev" id="hero-prev" aria-label="Previous slide">‹</button>
+    <button class="hero__nav next" id="hero-next" aria-label="Next slide">›</button>
+    <div class="hero__dots" id="hero-dots"></div>
   </section>
 
   <!-- Marquee -->

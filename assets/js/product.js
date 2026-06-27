@@ -13,12 +13,21 @@ document.addEventListener('DOMContentLoaded', async () => {
   let selected = (product.variants.find(v => v.stock_qty > 0) || product.variants[0]);
   const gallery = (product.images || []).map(im => (im.path[0] === '/' || im.path.startsWith('http')) ? im.path : '/' + im.path);
   let activeImg = 0;
+  let galleryTimer = null;
 
   function mainMedia() {
     if (gallery.length) {
-      return `<img class="tile-photo" id="pdp-photo" src="${gallery[activeImg]}" alt="${Fmt.escape(product.name)}">`;
+      return `<img class="tile-photo" id="pdp-photo" src="${gallery[activeImg]}" alt="${Fmt.escape(product.name)}">`
+        + `<span class="pdp__zoom-hint">Click to zoom</span>`;
     }
     return productIcon(product, 'pdp-ico');
+  }
+  function showSlide(i) {
+    if (!gallery.length) return;
+    activeImg = (i + gallery.length) % gallery.length;
+    const photo = root.querySelector('#pdp-photo');
+    if (photo) photo.src = gallery[activeImg];
+    root.querySelectorAll('[data-thumb]').forEach(x => x.classList.toggle('active', +x.dataset.thumb === activeImg));
   }
   function thumbs() {
     if (gallery.length) {
@@ -114,13 +123,27 @@ document.addEventListener('DOMContentLoaded', async () => {
       selected = product.variants.find(v => String(v.id) === b.dataset.variant);
       render();
     });
-    root.querySelectorAll('[data-thumb]').forEach(b => b.onclick = () => {
-      activeImg = +b.dataset.thumb;
-      root.querySelectorAll('[data-thumb]').forEach(x => x.classList.remove('active'));
-      b.classList.add('active');
-      const photo = root.querySelector('#pdp-photo');
-      if (photo && gallery[activeImg]) photo.src = gallery[activeImg];
-    });
+    root.querySelectorAll('[data-thumb]').forEach(b => b.onclick = () => showSlide(+b.dataset.thumb));
+
+    // Gallery: click main image to open the full-screen lightbox.
+    const main = root.querySelector('#pdp-main');
+    if (main && gallery.length) {
+      main.onclick = () => Lightbox.open(gallery, activeImg);
+    }
+    // Auto-advance every 3s in a loop when there's more than one image.
+    clearInterval(galleryTimer);
+    if (gallery.length > 1 && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      let paused = false;
+      if (main) {
+        main.addEventListener('mouseenter', () => { paused = true; });
+        main.addEventListener('mouseleave', () => { paused = false; });
+      }
+      galleryTimer = setInterval(() => {
+        const lb = document.getElementById('lightbox');
+        if (paused || (lb && lb.classList.contains('open'))) return;
+        showSlide(activeImg + 1);
+      }, 3000);
+    }
     root.querySelector('#q-inc').onclick = () => { qty = Math.min(selected.stock_qty, qty + 1); root.querySelector('#q-val').textContent = qty; };
     root.querySelector('#q-dec').onclick = () => { qty = Math.max(1, qty - 1); root.querySelector('#q-val').textContent = qty; };
     root.querySelectorAll('.accordion__head').forEach(h => h.onclick = () => h.parentElement.classList.toggle('open'));

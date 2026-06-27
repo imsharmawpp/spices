@@ -69,8 +69,8 @@ const UI = {
           <div class="header-actions">
             <select class="cur-select" id="cur-select" aria-label="Display currency"></select>
             <button class="icon-btn" aria-label="Search" data-action="toggle-search">${icons.search}</button>
-            <a class="icon-btn" aria-label="Account" href="/account">${icons.user}</a>
-            <a class="icon-btn" aria-label="Wishlist" href="/shop">${icons.heart}</a>
+            <a class="icon-btn hide-xs" aria-label="Account" href="/account">${icons.user}</a>
+            <a class="icon-btn hide-xs" aria-label="Wishlist" href="/shop">${icons.heart}</a>
             <button class="icon-btn" aria-label="Cart" data-action="open-cart">${icons.bag}<span class="cart-count hidden" id="cart-count">0</span></button>
           </div>
         </div>
@@ -327,6 +327,7 @@ const Anim = {
 
   // Split the hero <h1> into word spans for a staggered mask reveal.
   splitHeroTitle() {
+    if (document.querySelector('.hero-slider')) return; // slider manages its own slides
     const h = document.querySelector('.hero h1');
     if (!h || h.dataset.split) return;
     h.dataset.split = '1';
@@ -480,6 +481,64 @@ const Anim = {
         items[i].classList.add('active');
       }, 2300);
     });
+  },
+};
+
+// ---- Full-screen image lightbox (reusable) ----
+const Lightbox = {
+  images: [], index: 0, el: null,
+
+  mount() {
+    if (this.el) return;
+    const el = document.createElement('div');
+    el.className = 'lightbox';
+    el.id = 'lightbox';
+    el.innerHTML = `
+      <button class="lightbox__close" aria-label="Close">✕</button>
+      <button class="lightbox__nav prev" aria-label="Previous">‹</button>
+      <img class="lightbox__img" id="lightbox-img" alt="">
+      <button class="lightbox__nav next" aria-label="Next">›</button>
+      <div class="lightbox__count" id="lightbox-count"></div>`;
+    document.body.appendChild(el);
+    this.el = el;
+    el.querySelector('.lightbox__close').onclick = () => this.close();
+    el.querySelector('.prev').onclick = (e) => { e.stopPropagation(); this.go(-1); };
+    el.querySelector('.next').onclick = (e) => { e.stopPropagation(); this.go(1); };
+    el.onclick = (e) => { if (e.target === el) this.close(); };
+    document.addEventListener('keydown', (e) => {
+      if (!this.el.classList.contains('open')) return;
+      if (e.key === 'Escape') this.close();
+      if (e.key === 'ArrowRight') this.go(1);
+      if (e.key === 'ArrowLeft') this.go(-1);
+    });
+  },
+
+  open(images, index = 0) {
+    if (!images || !images.length) return;
+    this.mount();
+    this.images = images;
+    this.index = index;
+    this.render();
+    this.el.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  },
+
+  go(delta) {
+    this.index = (this.index + delta + this.images.length) % this.images.length;
+    this.render();
+  },
+
+  render() {
+    this.el.querySelector('#lightbox-img').src = this.images[this.index];
+    const multi = this.images.length > 1;
+    this.el.querySelectorAll('.lightbox__nav').forEach(n => n.style.display = multi ? 'grid' : 'none');
+    const count = this.el.querySelector('#lightbox-count');
+    count.textContent = multi ? `${this.index + 1} / ${this.images.length}` : '';
+  },
+
+  close() {
+    if (this.el) this.el.classList.remove('open');
+    document.body.style.overflow = '';
   },
 };
 
