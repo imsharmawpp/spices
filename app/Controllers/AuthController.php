@@ -74,6 +74,10 @@ final class AuthController
         $pdo = Database::connection();
         $guestCartId = $_SESSION['cart_id'] ?? null;
         $_SESSION['user_id'] = $userId;
+        // Issue a CSRF token for state-changing (admin) requests.
+        if (empty($_SESSION['csrf'])) {
+            $_SESSION['csrf'] = bin2hex(random_bytes(16));
+        }
 
         if ($guestCartId) {
             $userCart = $pdo->prepare('SELECT id FROM carts WHERE user_id=?');
@@ -107,6 +111,10 @@ final class AuthController
     {
         $stmt = Database::connection()->prepare('SELECT id,name,email,phone,role FROM users WHERE id=?');
         $stmt->execute([$id]);
-        return $stmt->fetch() ?: [];
+        $row = $stmt->fetch() ?: [];
+        if ($row) {
+            $row['csrf'] = $_SESSION['csrf'] ?? '';
+        }
+        return $row;
     }
 }

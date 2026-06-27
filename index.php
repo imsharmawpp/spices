@@ -97,6 +97,7 @@ $routesToPages = [
     '/about' => 'about.html',
     '/contact' => 'contact.html',
     '/order' => 'order.html',
+    '/admin' => 'admin.html',
 ];
 
 // Dynamic clean URLs

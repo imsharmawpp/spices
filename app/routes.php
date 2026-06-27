@@ -7,6 +7,8 @@ use App\Controllers\CartController;
 use App\Controllers\AuthController;
 use App\Controllers\CheckoutController;
 use App\Controllers\MiscController;
+use App\Controllers\AdminController;
+use App\Support\Guard;
 
 /** @var Router $router */
 
@@ -47,3 +49,47 @@ $router->get('/api/orders/{order_number}', [$checkout, 'showOrder']);
 // Content
 $router->post('/api/newsletter', [$misc, 'newsletter']);
 $router->post('/api/contact', [$misc, 'contact']);
+
+// ---------------- Admin / CMS (guarded) ----------------
+$ac = new AdminController();
+$admin = fn(callable $cb) => function (App\Core\Request $req, array $params = []) use ($cb) {
+    Guard::admin($req);
+    $cb($req, $params);
+};
+
+$router->get('/api/admin/dashboard', $admin([$ac, 'dashboard']));
+
+$router->get('/api/admin/products', $admin([$ac, 'listProducts']));
+$router->post('/api/admin/products', $admin([$ac, 'createProduct']));
+$router->get('/api/admin/products/{id}', $admin([$ac, 'getProduct']));
+$router->patch('/api/admin/products/{id}', $admin([$ac, 'updateProduct']));
+$router->delete('/api/admin/products/{id}', $admin([$ac, 'deleteProduct']));
+$router->post('/api/admin/products/{id}/variants', $admin([$ac, 'createVariant']));
+
+$router->patch('/api/admin/variants/{id}', $admin([$ac, 'updateVariant']));
+$router->delete('/api/admin/variants/{id}', $admin([$ac, 'deleteVariant']));
+
+$router->get('/api/admin/categories', $admin([$ac, 'listCategories']));
+$router->post('/api/admin/categories', $admin([$ac, 'createCategory']));
+$router->patch('/api/admin/categories/{id}', $admin([$ac, 'updateCategory']));
+$router->delete('/api/admin/categories/{id}', $admin([$ac, 'deleteCategory']));
+
+$router->get('/api/admin/orders', $admin([$ac, 'listOrders']));
+$router->get('/api/admin/orders/{order_number}', $admin([$ac, 'getOrder']));
+$router->patch('/api/admin/orders/{order_number}/status', $admin([$ac, 'updateOrderStatus']));
+
+$router->get('/api/admin/coupons', $admin([$ac, 'listCoupons']));
+$router->post('/api/admin/coupons', $admin([$ac, 'createCoupon']));
+$router->patch('/api/admin/coupons/{id}', $admin([$ac, 'updateCoupon']));
+$router->delete('/api/admin/coupons/{id}', $admin([$ac, 'deleteCoupon']));
+
+$router->get('/api/admin/reviews', $admin([$ac, 'listReviews']));
+$router->patch('/api/admin/reviews/{id}/approve', $admin([$ac, 'approveReview']));
+$router->delete('/api/admin/reviews/{id}', $admin([$ac, 'deleteReview']));
+
+$router->get('/api/admin/customers', $admin([$ac, 'listCustomers']));
+$router->get('/api/admin/messages', $admin([$ac, 'listMessages']));
+$router->get('/api/admin/subscribers', $admin([$ac, 'listSubscribers']));
+
+$router->get('/api/admin/settings', $admin([$ac, 'getSettings']));
+$router->patch('/api/admin/settings', $admin([$ac, 'updateSettings']));

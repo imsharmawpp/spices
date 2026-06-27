@@ -6,6 +6,7 @@ const API = {
       headers: { 'Content-Type': 'application/json' },
       credentials: 'same-origin',
     };
+    if (typeof window !== 'undefined' && window.__csrf) opts.headers['X-CSRF-Token'] = window.__csrf;
     if (body !== undefined) opts.body = JSON.stringify(body);
     const res = await fetch('/api' + path, opts);
     let payload = null;
