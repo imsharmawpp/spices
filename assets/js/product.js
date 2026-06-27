@@ -70,7 +70,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             <button id="q-inc" aria-label="Increase">+</button>
           </div>
           <button class="btn btn--primary btn--lg" id="add-btn" ${selected.stock_qty <= 0 ? 'disabled' : ''}>${selected.stock_qty <= 0 ? 'Sold out' : 'Add to cart'}</button>
-          <button class="icon-btn card__wish ${Wishlist.has(product.slug) ? 'active' : ''}" id="wish-btn" aria-label="Save">${'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 21s-8-5-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 10c0 6-8 11-8 11z"/></svg>'}</button>
+          <button class="icon-btn pdp-wish ${Wishlist.has(product.slug) ? 'active' : ''}" id="wish-btn" aria-label="Save to wishlist">${'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 21s-8-5-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 10c0 6-8 11-8 11z"/></svg>'}</button>
         </div>
         <div class="stock-dot ${selected.stock_qty > 0 ? '' : 'out'}">${selected.stock_qty > 0 ? selected.stock_qty + ' in stock' : 'Currently unavailable'}</div>
         <div class="trust-row">

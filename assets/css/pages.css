@@ -489,5 +489,8 @@ img, svg, video, .tile-photo { max-width: 100%; }
 .lightbox__nav.prev { left: 20px; } .lightbox__nav.next { right: 20px; }
 .lightbox__count { position: absolute; bottom: 22px; left: 50%; transform: translateX(-50%); color: rgba(255,255,255,.8); font-size: var(--fs-sm); letter-spacing: .1em; }
 .pdp__main { cursor: zoom-in; position: relative; }
+.pdp-wish { border: 1.5px solid var(--color-border); }
+.pdp-wish:hover { border-color: var(--color-primary); }
+.pdp-wish.active { color: var(--color-sale); border-color: var(--color-sale); }
 .pdp__zoom-hint { position: absolute; top: 12px; right: 12px; background: rgba(0,0,0,.45); color: #fff; font-size: var(--fs-xs); padding: 5px 10px; border-radius: var(--radius-pill); display: flex; align-items: center; gap: 6px; pointer-events: none; }
 @media (max-width: 560px) { .lightbox__nav { width: 42px; height: 42px; } }
