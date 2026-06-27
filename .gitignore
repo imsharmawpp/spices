@@ -1,0 +1,16 @@
+# Environment & secrets
+.env
+
+# Local SQLite database & runtime storage
+/storage/*.sqlite
+/storage/logs/*
+/storage/cache/*
+!/storage/.gitkeep
+
+# Dependencies
+/vendor/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.log

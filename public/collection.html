@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shop Spices — Saffra Spices</title>
+  <meta name="description" content="Browse single-origin whole spices, ground spices, blends, gift sets and organic spices.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/tokens.css">
+  <link rel="stylesheet" href="/assets/css/base.css">
+  <link rel="stylesheet" href="/assets/css/components.css">
+  <link rel="stylesheet" href="/assets/css/pages.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌶️</text></svg>">
+</head>
+<body>
+<main id="main" class="container">
+  <header class="collection-header">
+    <span class="eyebrow">The collection</span>
+    <h1 id="collection-title">Shop All Spices</h1>
+    <p id="collection-desc"></p>
+  </header>
+
+  <div class="shop-toolbar">
+    <div style="display:flex;gap:12px;align-items:center">
+      <button class="btn btn--light filter-toggle" id="filter-toggle">Filters</button>
+      <span class="muted" id="result-count"></span>
+    </div>
+    <label style="display:flex;align-items:center;gap:8px">
+      <span class="muted" style="font-size:.85rem">Sort</span>
+      <select id="sort-select">
+        <option value="popular">Most popular</option>
+        <option value="newest">Newest</option>
+        <option value="price_asc">Price: low to high</option>
+        <option value="price_desc">Price: high to low</option>
+        <option value="rating">Top rated</option>
+      </select>
+    </label>
+  </div>
+
+  <div class="shop-layout">
+    <aside class="filters" id="filters">
+      <div style="display:flex;justify-content:space-between;align-items:center" class="filter-toggle">
+        <h4 style="margin:0">Filters</h4>
+        <button class="icon-btn" id="close-filters" aria-label="Close">✕</button>
+      </div>
+      <div class="filter-group">
+        <h4>Category</h4>
+        <div id="filter-categories"></div>
+      </div>
+      <div class="filter-group">
+        <h4>Form</h4>
+        <label><input type="radio" name="form" data-form-filter value=""> Any</label>
+        <label><input type="radio" name="form" data-form-filter value="whole"> Whole</label>
+        <label><input type="radio" name="form" data-form-filter value="ground"> Ground</label>
+        <label><input type="radio" name="form" data-form-filter value="blend"> Blend</label>
+      </div>
+      <div class="filter-group">
+        <h4>Attributes</h4>
+        <label><input type="checkbox" id="filter-organic"> Organic only</label>
+      </div>
+    </aside>
+
+    <div>
+      <div class="product-grid" id="shop-grid"></div>
+      <div class="pill-row" id="pagination" style="justify-content:center;margin-top:32px"></div>
+    </div>
+  </div>
+</main>
+
+<script src="/assets/js/api.js"></script>
+<script src="/assets/js/ui.js"></script>
+<script src="/assets/js/catalog.js"></script>
+<script>
+  document.getElementById('close-filters')?.addEventListener('click', () => document.getElementById('filters').classList.remove('open'));
+</script>
+</body>
+</html>

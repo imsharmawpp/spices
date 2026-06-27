@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact — Saffra Spices</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/tokens.css">
+  <link rel="stylesheet" href="/assets/css/base.css">
+  <link rel="stylesheet" href="/assets/css/components.css">
+  <link rel="stylesheet" href="/assets/css/pages.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌶️</text></svg>">
+</head>
+<body>
+<main id="main" class="container section--tight">
+  <div class="auth-wrap">
+    <div class="text-center"><span class="eyebrow">We're here to help</span><h1 style="margin-top:6px">Get in touch</h1><p class="muted" style="margin-top:8px">Questions about an order, a spice, or a recipe? Send us a note.</p></div>
+    <form class="panel" id="contact-form" style="margin-top:24px">
+      <div class="field"><label>Name</label><input name="name" required><span class="err" data-err="name"></span></div>
+      <div class="field"><label>Email</label><input type="email" name="email" required><span class="err" data-err="email"></span></div>
+      <div class="field"><label>Subject</label><input name="subject"></div>
+      <div class="field"><label>Message</label><textarea name="message" rows="5" required></textarea><span class="err" data-err="message"></span></div>
+      <button class="btn btn--primary btn--block btn--lg">Send message</button>
+    </form>
+  </div>
+</main>
+
+<script src="/assets/js/api.js"></script>
+<script src="/assets/js/ui.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const form = document.getElementById('contact-form');
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    form.querySelectorAll('.err').forEach(x => x.textContent = '');
+    const body = Object.fromEntries(new FormData(form).entries());
+    try { const r = await API.post('/contact', body); UI.toast(r.data.message); form.reset(); }
+    catch (err) {
+      if (err.details) Object.entries(err.details).forEach(([k, m]) => { const el = form.querySelector(`[data-err="${k}"]`); if (el) el.textContent = Array.isArray(m) ? m[0] : m; });
+      UI.toast(err.message, 'error');
+    }
+  });
+});
+</script>
+</body>
+</html>

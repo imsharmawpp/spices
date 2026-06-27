@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Saffra Spices — Single-Origin Spices, Ground Fresh</title>
+  <meta name="description" content="Single-origin spices and small-batch blends, ground fresh and shipped with care. Free shipping over $49.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/tokens.css">
+  <link rel="stylesheet" href="/assets/css/base.css">
+  <link rel="stylesheet" href="/assets/css/components.css">
+  <link rel="stylesheet" href="/assets/css/pages.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌶️</text></svg>">
+</head>
+<body>
+<main id="main">
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero__inner">
+      <div class="hero__content">
+        <span class="eyebrow">Single-origin · Small batch</span>
+        <h1>Spices That Tell a Story</h1>
+        <p>From quiet morning chai to unforgettable feasts, our spices are sourced at origin and ground fresh to order — so every pinch sings.</p>
+        <div class="hero__cta">
+          <a class="btn btn--primary btn--lg" href="/shop">Shop the collection</a>
+          <a class="btn btn--light btn--lg" href="/shop/gift-sets">Explore gift sets</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Value strip -->
+  <section class="section--tight" style="padding-block:32px;border-bottom:1px solid var(--color-border)">
+    <div class="container value-strip">
+      <div class="v-item"><div class="v-ico">🌍</div><strong>Sourced at origin</strong><p>Direct from growers</p></div>
+      <div class="v-item"><div class="v-ico">🧂</div><strong>Ground fresh</strong><p>In small batches</p></div>
+      <div class="v-item"><div class="v-ico">🚚</div><strong>Free shipping</strong><p>On orders over $49</p></div>
+      <div class="v-item"><div class="v-ico">🌱</div><strong>No fillers</strong><p>Pure spice, always</p></div>
+    </div>
+  </section>
+
+  <!-- Bestsellers -->
+  <section class="section">
+    <div class="container">
+      <div class="carousel-head">
+        <div><span class="eyebrow">Loved by cooks</span><h2>Bestsellers</h2></div>
+        <a class="btn btn--light" href="/shop">View all</a>
+      </div>
+      <div class="product-grid" id="bestsellers"></div>
+    </div>
+  </section>
+
+  <!-- Category tiles -->
+  <section class="section section--tight" style="background:var(--color-surface-2)">
+    <div class="container">
+      <div class="section-head"><span class="eyebrow">Browse</span><h2>Shop by category</h2></div>
+      <div class="cat-tiles" id="cat-tiles"></div>
+    </div>
+  </section>
+
+  <!-- New arrivals -->
+  <section class="section">
+    <div class="container">
+      <div class="carousel-head">
+        <div><span class="eyebrow">Fresh in</span><h2>New arrivals</h2></div>
+        <a class="btn btn--light" href="/shop?sort=newest">View all</a>
+      </div>
+      <div class="product-grid" id="new-arrivals"></div>
+    </div>
+  </section>
+
+  <!-- Promo banner -->
+  <section class="section">
+    <div class="container">
+      <div class="promo">
+        <div class="promo__art">🎁</div>
+        <div class="promo__body">
+          <span class="eyebrow">Made to gift</span>
+          <h2>The Spice Lovers Gift Box</h2>
+          <p>Six of our most-loved spices and blends in a beautiful wooden box, with a handwritten card. The perfect present for any home cook.</p>
+          <a class="btn btn--primary btn--lg" href="/product/spice-lovers-gift-box">Shop the gift box</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- UGC / Follow our journey -->
+  <section class="section section--tight">
+    <div class="container">
+      <div class="section-head"><span class="eyebrow">@saffraspices</span><h2>Follow our journey</h2><p>Tag us in your kitchen creations to be featured.</p></div>
+      <div class="ugc-grid">
+        <div class="ugc" style="background:linear-gradient(135deg,#E0A42233,#E0A42211)">🍛</div>
+        <div class="ugc" style="background:linear-gradient(135deg,#C8531B33,#C8531B11)">🌶️</div>
+        <div class="ugc" style="background:linear-gradient(135deg,#3F7D3A33,#3F7D3A11)">🥘</div>
+        <div class="ugc" style="background:linear-gradient(135deg,#9E3F1233,#9E3F1211)">☕</div>
+        <div class="ugc" style="background:linear-gradient(135deg,#B3261E33,#B3261E11)">🍲</div>
+        <div class="ugc" style="background:linear-gradient(135deg,#7A5C3E33,#7A5C3E11)">🫓</div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script src="/assets/js/api.js"></script>
+<script src="/assets/js/ui.js"></script>
+<script src="/assets/js/home.js"></script>
+</body>
+</html>
