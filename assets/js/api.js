@@ -24,7 +24,13 @@ const API = {
 
 // ---- formatting helpers ----
 const Fmt = {
-  money(n) { return '$' + Number(n || 0).toFixed(2); },
+  symbol: '₹',
+  money(n) {
+    const v = Number(n || 0);
+    // Indian digit grouping (e.g. ₹1,19,999.00)
+    const num = v.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    return this.symbol + num;
+  },
   stars(rating) {
     const full = Math.round(Number(rating) || 0);
     return '★★★★★'.slice(0, full) + '☆☆☆☆☆'.slice(0, 5 - full);

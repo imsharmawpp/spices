@@ -25,10 +25,12 @@ const UI = {
 
   async init() {
     try { this.settings = (await API.get('/settings')).data; } catch (_) {}
+    if (this.settings.currency_symbol) Fmt.symbol = this.settings.currency_symbol;
     try { this.me = (await API.get('/auth/me')).data; } catch (_) { this.me = null; }
     this.renderChrome();
     await Cart.refresh();
     this.bind();
+    Anim.init();
   },
 
   renderChrome() {
@@ -158,7 +160,7 @@ const UI = {
     if (p.badge) badges.push(`<span class="badge ${p.badge === 'Organic' ? 'badge--organic' : 'badge--accent'}">${Fmt.escape(p.badge)}</span>`);
     const wished = Wishlist.has(p.slug);
     return `
-    <article class="card">
+    <article class="card reveal">
       <a href="/product/${p.slug}" class="card__media" style="${tileStyle(p.accent_color)}" aria-label="${Fmt.escape(p.name)}">
         <span class="tile-emoji">${p.emoji || '🫙'}</span>
       </a>
@@ -271,6 +273,113 @@ const Cart = {
     const it = this.data.items.find(i => String(i.id) === String(id));
     if (!it) return;
     this.updateItem(id, it.quantity + delta).catch(e => UI.toast(e.message, 'error'));
+  },
+};
+
+// ---- Motion layer (scroll reveal, header state, hero, magnetic buttons) ----
+const Anim = {
+  reduced: false,
+
+  init() {
+    this.reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    document.body.classList.add('anim-ready');
+
+    // Page fade-in + hero load trigger
+    requestAnimationFrame(() => {
+      document.body.classList.add('page-ready');
+      requestAnimationFrame(() => document.body.classList.add('loaded'));
+    });
+
+    this.splitHeroTitle();
+    this.observeReveals();
+    this.headerScroll();
+    this.heroParallax();
+    if (!this.reduced) this.magnetic();
+  },
+
+  // Split the hero <h1> into word spans for a staggered mask reveal.
+  splitHeroTitle() {
+    const h = document.querySelector('.hero h1');
+    if (!h || h.dataset.split) return;
+    h.dataset.split = '1';
+    h.classList.add('hero-title');
+    const words = h.textContent.trim().split(/\s+/);
+    h.innerHTML = words.map(w => `<span class="word"><span>${Fmt.escape(w)}</span></span>`).join(' ');
+  },
+
+  // IntersectionObserver-based scroll reveal, auto-applied to .reveal elements.
+  observeReveals() {
+    if (this.reduced || !('IntersectionObserver' in window)) {
+      document.querySelectorAll('.reveal').forEach(el => el.classList.add('in-view'));
+      return;
+    }
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) { e.target.classList.add('in-view'); io.unobserve(e.target); }
+      });
+    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.08 });
+
+    const stagger = (el) => {
+      // Stagger siblings within the same grid/carousel for a cascade effect.
+      const parent = el.parentElement;
+      if (parent && (parent.classList.contains('product-grid') || parent.classList.contains('cat-tiles') || parent.classList.contains('carousel'))) {
+        const i = Array.prototype.indexOf.call(parent.children, el);
+        el.style.setProperty('--reveal-delay', Math.min(i, 8) * 0.07 + 's');
+      }
+    };
+
+    const observeAll = (root) => root.querySelectorAll('.reveal:not(.in-view)').forEach(el => { stagger(el); io.observe(el); });
+    observeAll(document);
+
+    // Re-scan when content is injected dynamically (cards, etc.)
+    this._mo = new MutationObserver((muts) => {
+      muts.forEach(m => m.addedNodes.forEach(n => {
+        if (n.nodeType !== 1) return;
+        if (n.classList && n.classList.contains('reveal')) { stagger(n); io.observe(n); }
+        if (n.querySelectorAll) observeAll(n);
+      }));
+    });
+    this._mo.observe(document.body, { childList: true, subtree: true });
+  },
+
+  headerScroll() {
+    const header = document.querySelector('.site-header');
+    if (!header) return;
+    const onScroll = () => header.classList.toggle('scrolled', window.scrollY > 24);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+  },
+
+  heroParallax() {
+    if (this.reduced) return;
+    const float = document.querySelector('.hero__art-float');
+    const hero = document.querySelector('.hero');
+    if (!hero) return;
+    window.addEventListener('scroll', () => {
+      const y = window.scrollY;
+      if (y < window.innerHeight) {
+        if (float) float.style.transform = `translateY(${y * 0.18}px)`;
+        const content = hero.querySelector('.hero__content');
+        if (content) content.style.transform = `translateY(${y * 0.06}px)`;
+      }
+    }, { passive: true });
+  },
+
+  // Subtle magnetic pull on large buttons (desktop pointers only).
+  magnetic() {
+    if (!window.matchMedia('(pointer: fine)').matches) return;
+    document.body.addEventListener('mousemove', (e) => {
+      const btn = e.target.closest('.btn--lg, .icon-btn');
+      if (!btn) return;
+      const r = btn.getBoundingClientRect();
+      const mx = e.clientX - (r.left + r.width / 2);
+      const my = e.clientY - (r.top + r.height / 2);
+      btn.style.transform = `translate(${mx * 0.18}px, ${my * 0.22}px)`;
+    });
+    document.body.addEventListener('mouseout', (e) => {
+      const btn = e.target.closest('.btn--lg, .icon-btn');
+      if (btn) btn.style.transform = '';
+    });
   },
 };
 
