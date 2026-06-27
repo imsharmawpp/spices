@@ -16,7 +16,10 @@ use App\Core\Response;
 use App\Core\Router;
 use App\Support\Env;
 
-$root = dirname(__DIR__);
+// The project root is the web root (this file lives at the top level so the
+// frontend serves directly from public_html). Backend folders sit alongside and
+// are protected by their own .htaccess deny rules.
+$root = __DIR__;
 require $root . '/app/Support/Env.php';
 require $root . '/app/Support/autoload.php';
 
@@ -32,9 +35,17 @@ if ($base !== '' && str_starts_with($path, $base)) {
     $path = substr($path, strlen($base)) ?: '/';
 }
 
-// Let the built-in server handle real static files (assets, html).
-if (php_sapi_name() === 'cli-server' && $path !== '/' && is_file(__DIR__ . $path)) {
-    return false;
+// On the PHP dev server: serve real static files directly, but never expose
+// backend code, the database, storage or dotfiles (Apache uses .htaccess for this).
+if (php_sapi_name() === 'cli-server') {
+    if (preg_match('#^/(app|database|storage|docs)(/|$)#', $path) || preg_match('#(^|/)\.#', $path)) {
+        http_response_code(403);
+        echo 'Forbidden';
+        return true;
+    }
+    if ($path !== '/' && is_file(__DIR__ . $path)) {
+        return false;
+    }
 }
 
 // --- API requests ---

@@ -1,17 +1,14 @@
 # Deploying to Hostinger (WordPress / shared hosting — no VPS, no SSH needed)
 
-This store is plain **PHP + MySQL + static assets**, so it runs on a standard
-Apache shared-hosting plan. You deploy it with **File Manager** (or FTP) and
-**phpMyAdmin** — no command line required.
+This store is plain **PHP + MySQL + static assets**. The project root **is** the
+web root, so you simply upload everything into `public_html` and it works at your
+domain root — no `/public/` sub-folder, no document-root changes.
 
-> **Recommended:** host the store on its **own domain or sub-domain root** (e.g.
-> `shop.yourdomain.com`). That keeps the links/assets working with no extra
-> config. A sub-folder under an existing WordPress site is possible but needs
-> the extra `APP_BASE` step in section 6.
+> Deploy with **File Manager** (or FTP) + **phpMyAdmin**. No command line required.
 
 ---
 
-## 1. Create the database (you already have this)
+## 1. Database (you already created this)
 
 | Setting | Value |
 |---------|-------|
@@ -22,50 +19,37 @@ Apache shared-hosting plan. You deploy it with **File Manager** (or FTP) and
 
 ## 2. Import the data (phpMyAdmin)
 
-1. Hostinger panel → **Databases → phpMyAdmin** → open `u770423744_spices`.
-2. Go to the **Import** tab.
-3. Choose file: **`database/spices_mysql.sql`** (from this project).
-4. Make sure format is **SQL** and charset is **utf8mb4**, then click **Import**.
+1. hPanel → **Databases → phpMyAdmin** → open `u770423744_spices`.
+2. **Import** tab → choose file **`database/spices_mysql.sql`** → **Import**.
+3. You should end up with ~18 tables and the demo catalogue (14 spices,
+   categories, reviews, coupons, an admin user).
 
-This creates all tables and loads the demo catalog (14 spices, categories,
-reviews, coupons, an admin user). You should see ~18 tables afterwards.
+> Empty tables only? Import `database/schema.mysql.sql` instead.
 
-> If you only want empty tables, import `database/schema.mysql.sql` instead.
+## 3. Upload the files — everything goes **inside `public_html`**
 
-## 3. Upload the files
-
-Using **File Manager** (or FTP), with the store on its own domain/sub-domain
-whose document root is, say, `.../public_html`:
-
-- Upload **everything inside the project's `public/` folder** into the web root
-  (`public_html`) — this includes `index.php`, `.htaccess`, the `*.html` pages
-  and the `assets/` folder.
-- Upload the `app/` and `database/` folders **one level above** the web root
-  (the same level as `public_html`, i.e. your account home directory).
-- Create an empty `storage/` folder one level above the web root too.
-
-Resulting layout:
+Put the **contents of this project** directly into `public_html` so the layout is:
 
 ```
-/home/u770423744/
-├── app/                 (backend code — not web-accessible)
-├── database/            (schema + import file)
-├── storage/             (writable; logs/cache; not web-accessible)
-├── .env                 (your config — see step 4)
-└── public_html/         (web root)
-    ├── index.php
-    ├── .htaccess
-    ├── *.html
-    └── assets/
+public_html/                 ← your web root (the domain points here)
+├── index.php                ← front controller
+├── .htaccess                ← routing + security (already included)
+├── index.html, shop…        ← all *.html pages
+├── assets/                  ← css + js
+├── app/                     ← backend code  (blocked from the web by .htaccess)
+├── database/                ← schema + import file (blocked)
+├── storage/                 ← writable cache/logs (blocked)
+└── .env                     ← your config (blocked; see step 4)
 ```
 
-The included `.htaccess` files already block direct web access to `app/`,
-`database/` and `storage/` if they ever end up inside the web root.
+> ⚠️ Important: upload the **files themselves** into `public_html`, not a folder
+> containing them. If you see `your-site.com/public/index.html`, you uploaded one
+> level too deep — move the files up so `index.php` sits directly in `public_html`.
 
-## 4. Create the `.env` file
+The bundled `.htaccess` files already return **403** for `app/`, `database/`,
+`storage/`, `.env` and any dotfile, so keeping them in the web root is safe.
 
-In the folder **one level above** `public_html` (next to `app/`), create a file
-named `.env` with:
+## 4. Create the `.env` file (in `public_html`, next to `index.php`)
 
 ```
 APP_ENV=production
@@ -85,35 +69,42 @@ CURRENCY_SYMBOL=$
 PAYMENT_PROVIDER=mock
 ```
 
-> The app reads `.env` from the project root (one level above `public_html`).
-> Keep this file out of the web root. It is git-ignored on purpose.
-
 ## 5. Test
 
-Visit your domain/sub-domain. You should see the storefront with products.
-Quick checks:
-- `https://your-site/` → home page with spices
-- `https://your-site/shop` → catalogue with filters
-- `https://your-site/api/products` → JSON list of products
+Open your domain (e.g. `https://yellow-dogfish-518936.hostingersite.com/`):
+- `/` → styled home page with product tiles
+- `/shop` → catalogue with filters
+- `/product/turmeric-powder` → product detail
+- `/api/products` → JSON list (confirms PHP + DB are connected)
 
 Demo logins: `maya@example.com` / `password` · admin role: `admin@saffra.test` / `admin123`.
 
-## 6. (Only if using a sub-folder, e.g. `yourdomain.com/spices`)
+### If the page looks unstyled / products don't load
+- You're probably viewing `…/public/index.html`. Move the files so `index.php`
+  is directly in `public_html` (see step 3) and open the domain root, not `/public/`.
+- Make sure `.htaccess` uploaded (it's a hidden file — enable "show hidden files"
+  in File Manager).
 
-1. Put the `public/` contents into `public_html/spices/` and `app/`,`database/`,
-   `storage/`,`.env` into `public_html/` (above the `spices` folder won't be
-   above the web root, so rely on the bundled `.htaccess` deny rules).
+## 6. Sub-folder install (only if NOT at the domain root)
+
+If the store must live at `yourdomain.com/spices`:
+1. Upload the project contents into `public_html/spices/`.
 2. In `.env` set `APP_BASE=/spices`.
 3. In `public_html/spices/.htaccess` uncomment and set `RewriteBase /spices/`.
 
-> Sub-folder hosting also requires the front-end asset/API paths to resolve from
-> that sub-folder. The simplest, most reliable option remains a **sub-domain**.
+> A domain or **sub-domain root** is simpler and recommended.
 
 ---
 
+## Local development
+
+```bash
+cp .env.example .env   # defaults to sqlite fallback; fine for local
+php -S 127.0.0.1:8000 index.php   # run from the project root
+# open http://127.0.0.1:8000
+```
+
 ## Notes
-- **Payments are mocked** — no real charge is taken. Integrate a gateway
-  (Razorpay/Stripe/PayPal) before taking live orders (see `docs/05-api-spec.md`).
-- **Product images** are rendered as on-brand emoji/colour tiles; swap in real
-  photography by populating `product_images` and updating the card/PDP rendering.
-- To re-import a clean catalogue later, drop the tables and re-run step 2.
+- **Payments are mocked** — integrate a gateway before taking live orders.
+- **Product images** are emoji/colour tiles; swap in real photos via `product_images`.
+- Re-import to reset the catalogue (drop tables, repeat step 2).

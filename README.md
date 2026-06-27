@@ -13,7 +13,7 @@ A Direct-to-Consumer online store for a spices company.
 
 ---
 
-## Quick start
+## Quick start (local)
 
 Requirements: PHP 8.1+ with `pdo_sqlite` (PHP 8.4 used in development).
 
@@ -21,13 +21,10 @@ Requirements: PHP 8.1+ with `pdo_sqlite` (PHP 8.4 used in development).
 # 1. From the project root
 cp .env.example .env          # optional — sensible defaults are used if absent
 
-# 2. (Optional) seed the database manually. It also auto-seeds on first request.
-php database/migrate.php
+# 2. Start the dev server (the project root IS the web root)
+php -S 127.0.0.1:8000 index.php
 
-# 3. Start the dev server
-php -S 127.0.0.1:8000 -t public public/index.php
-
-# 4. Open the store
+# 3. Open the store
 #    http://127.0.0.1:8000
 ```
 
@@ -64,22 +61,27 @@ See **[docs/](docs/README.md)** for the full plan, requirements, schema, API spe
 
 ## Project structure
 
+The project root is the **web root** (so it deploys straight into `public_html`).
+Backend folders sit alongside and are blocked from the web by `.htaccess`.
+
 ```
-spices/
-├── app/                  # PHP backend (Core, Controllers, Services, Support)
+spices/  (= public_html on the host)
+├── index.php             # front controller (API + clean-URL page routing)
+├── .htaccess             # routing + security (blocks app/database/storage/.env)
+├── *.html                # storefront pages
+├── assets/{css,js}/      # design system + page modules
+├── app/                  # PHP backend (Core, Controllers, Services, Support) — web-blocked
 │   ├── Core/             # Database (PDO), Router, Request, Response
 │   ├── Controllers/      # Catalog, Cart, Auth, Checkout, Misc
 │   ├── Services/         # CartService (totals), Settings
 │   └── routes.php        # API route table
-├── database/
-│   ├── schema.sqlite.sql # SQLite schema (mirrors the MySQL design in docs/04)
-│   └── migrate.php       # schema + spice catalog seed
-├── public/               # Web root
-│   ├── index.php         # front controller (API + clean-URL page routing)
-│   ├── *.html            # storefront pages
-│   └── assets/{css,js}/  # design system + page modules
-├── storage/              # SQLite db, logs, cache (gitignored)
+├── database/             # schema (sqlite + mysql) + seed + phpMyAdmin import — web-blocked
+│   ├── schema.mysql.sql
+│   ├── spices_mysql.sql  # ready-to-import dump (schema + demo catalogue)
+│   └── migrate.php
+├── storage/              # SQLite db, logs, cache (gitignored, web-blocked)
 ├── docs/                 # planning & reference documentation
+├── .env                  # config/secrets (gitignored, web-blocked)
 └── composer.json         # PSR-4 autoload + helper scripts
 ```
 
