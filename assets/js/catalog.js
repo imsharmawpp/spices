@@ -60,7 +60,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const items = res.data;
       document.getElementById('result-count').textContent = `${res.meta.total} product${res.meta.total === 1 ? '' : 's'}`;
       if (!items.length) {
-        grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="big-emoji">🔍</div><p>No spices match these filters.</p></div>`;
+        grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="big-emoji">${Icons.html('search', '#C8531B')}</div><p>No spices match these filters.</p></div>`;
         document.getElementById('pagination').innerHTML = '';
         return;
       }

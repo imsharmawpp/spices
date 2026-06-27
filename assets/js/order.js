@@ -21,13 +21,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   let order;
   try { order = (await API.get('/orders/' + encodeURIComponent(num))).data; }
-  catch (e) { root.innerHTML = `<div class="empty-state"><div class="big-emoji">🔍</div><p>Order not found.</p><a class="btn btn--primary" href="/order">Try again</a></div>`; return; }
+  catch (e) { root.innerHTML = `<div class="empty-state"><div class="big-emoji">${Icons.html('search', '#C8531B')}</div><p>Order not found.</p><a class="btn btn--primary" href="/order">Try again</a></div>`; return; }
 
   const steps = ['pending', 'paid', 'packed', 'shipped', 'delivered'];
   const idx = Math.max(0, steps.indexOf(order.status));
 
   root.innerHTML = `
-    ${isNew ? `<div class="text-center" style="margin-bottom:24px"><div style="font-size:3rem">🎉</div><h1>Thank you!</h1><p class="muted">Your order is confirmed. A receipt is on its way to ${Fmt.escape(order.email)}.</p></div>` : `<h1 style="text-align:center;margin-bottom:24px">Order ${Fmt.escape(order.order_number)}</h1>`}
+    ${isNew ? `<div class="text-center" style="margin-bottom:24px"><div class="empty-ico" style="margin:0 auto;width:64px">${Icons.html('spark', '#E0A422')}</div><h1>Thank you!</h1><p class="muted">Your order is confirmed. A receipt is on its way to ${Fmt.escape(order.email)}.</p></div>` : `<h1 style="text-align:center;margin-bottom:24px">Order ${Fmt.escape(order.order_number)}</h1>`}
     <div class="checkout-page">
       <div class="panel">
         <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:16px">

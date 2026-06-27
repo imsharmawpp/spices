@@ -30,7 +30,18 @@ const UI = {
     this.renderChrome();
     await Cart.refresh();
     this.bind();
+    Icons.hydrate();
+    this.setFavicon();
     Anim.init();
+  },
+
+  setFavicon() {
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">${Icons.shapes.jar('#C8531B', 'fav', Icons)}</svg>`;
+    const href = 'data:image/svg+xml,' + encodeURIComponent(svg);
+    let link = document.querySelector('link[rel="icon"]');
+    if (!link) { link = document.createElement('link'); link.rel = 'icon'; document.head.appendChild(link); }
+    link.type = 'image/svg+xml';
+    link.href = href;
   },
 
   renderChrome() {
@@ -163,7 +174,7 @@ const UI = {
     return `
     <article class="card reveal">
       <a href="/product/${p.slug}" class="card__media" style="${tileStyle(p.accent_color)}" aria-label="${Fmt.escape(p.name)}">
-        <span class="tile-emoji">${p.emoji || '🫙'}</span>
+        <span class="tile-emoji">${productIcon(p)}</span>
       </a>
       <div class="card__badges">${badges.join('')}</div>
       <button class="icon-btn card__wish ${wished ? 'active' : ''}" data-wish="${p.slug}" aria-label="Save to wishlist">${icons.heart}</button>
@@ -233,14 +244,14 @@ const Cart = {
     if (!items || !foot) return;
 
     if (!this.data.items || !this.data.items.length) {
-      items.innerHTML = `<div class="cart-empty"><p style="font-size:2.5rem">🛒</p><p>Your cart is empty.</p><a class="btn btn--primary" href="/shop" style="margin-top:12px">Start shopping</a></div>`;
+      items.innerHTML = `<div class="cart-empty"><span class="empty-ico">${Icons.html('bag', '#C8531B')}</span><p>Your cart is empty.</p><a class="btn btn--primary" href="/shop" style="margin-top:12px">Start shopping</a></div>`;
       foot.innerHTML = '';
       return;
     }
 
     items.innerHTML = this.data.items.map(it => `
       <div class="cart-line">
-        <a href="/product/${it.slug}" class="cart-line__media" style="${tileStyle(it.accent_color)}">${it.emoji || '🫙'}</a>
+        <a href="/product/${it.slug}" class="cart-line__media" style="${tileStyle(it.accent_color)}">${productIcon(it, 'tile-ico tile-ico--sm')}</a>
         <div>
           <div class="cart-line__title">${Fmt.escape(it.product_name)}</div>
           <div class="cart-line__meta">${Fmt.escape(it.variant_name)} · ${Fmt.money(it.price)}</div>
@@ -340,6 +351,7 @@ const Anim = {
     this._mo = new MutationObserver((muts) => {
       muts.forEach(m => m.addedNodes.forEach(n => {
         if (n.nodeType !== 1) return;
+        if (typeof Icons !== 'undefined' && n.querySelectorAll) Icons.hydrate(n);
         if (n.classList && n.classList.contains('reveal')) { stagger(n); io.observe(n); }
         if (n.querySelectorAll) observeAll(n);
       }));

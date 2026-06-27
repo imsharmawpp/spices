@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   let product;
   try { product = (await API.get('/products/' + slug)).data; }
-  catch (e) { root.innerHTML = `<div class="empty-state"><div class="big-emoji">🫙</div><p>Product not found.</p><a class="btn btn--primary" href="/shop">Back to shop</a></div>`; return; }
+  catch (e) { root.innerHTML = `<div class="empty-state"><div class="big-emoji">${Icons.html('jar', '#C8531B')}</div><p>Product not found.</p><a class="btn btn--primary" href="/shop">Back to shop</a></div>`; return; }
 
   document.title = `${product.name} · Saffra Spices`;
   let selected = (product.variants.find(v => v.stock_qty > 0) || product.variants[0]);
@@ -23,9 +23,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     <nav class="breadcrumb"><a href="/">Home</a> / <a href="/shop/${product.category_slug}">${Fmt.escape(product.category_name)}</a> / ${Fmt.escape(product.name)}</nav>
     <div class="pdp">
       <div class="pdp__gallery">
-        <div class="pdp__main" id="pdp-main" style="${tileStyle(product.accent_color)}">${product.emoji || '🫙'}</div>
+        <div class="pdp__main" id="pdp-main" style="${tileStyle(product.accent_color)}">${productIcon(product, 'pdp-ico')}</div>
         <div class="pdp__thumbs">
-          ${tiles.map((t, i) => `<button class="${i === 0 ? 'active' : ''}" data-thumb="${i}" style="${tileStyle(product.accent_color)}">${t}</button>`).join('')}
+          ${tiles.map((t, i) => `<button class="${i === 0 ? 'active' : ''}" data-thumb="${i}" style="${tileStyle(product.accent_color)}">${productIcon(product, 'tile-ico tile-ico--sm')}</button>`).join('')}
         </div>
       </div>
       <div class="pdp__info">
@@ -52,7 +52,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         </div>
         <div class="stock-dot ${selected.stock_qty > 0 ? '' : 'out'}">${selected.stock_qty > 0 ? selected.stock_qty + ' in stock' : 'Currently unavailable'}</div>
         <div class="trust-row">
-          <span>🔒 Secure checkout</span><span>🚚 Free over ${Fmt.money(UI.settings.free_shipping_threshold)}</span><span>🌱 Freshly ground</span>
+          <span>${Icons.html('lock', '#C8531B', 'trust-ico')} Secure checkout</span><span>${Icons.html('truck', '#C8531B', 'trust-ico')} Free over ${Fmt.money(UI.settings.free_shipping_threshold)}</span><span>${Icons.html('leaf', '#3F7D3A', 'trust-ico')} Freshly ground</span>
         </div>
 
         <div class="accordion" style="margin-top:24px">

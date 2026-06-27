@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const tiles = document.getElementById('cat-tiles');
     if (tiles) tiles.innerHTML = cats.map(c => `
       <a class="cat-tile reveal" href="/shop/${c.slug}" style="background:linear-gradient(150deg, ${c.accent_color}, ${c.accent_color}cc)">
-        <span class="cat-tile__emoji">${c.emoji || '🫙'}</span>
+        <span class="cat-tile__emoji">${Icons.html(Icons.categoryIcon(c.slug), '#FFFFFF')}</span>
         <h3>${Fmt.escape(c.name)}</h3>
         <span>Shop now</span>
       </a>`).join('');

@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
       <h3 style="margin-bottom:12px">Order Summary</h3>
       ${d.items.map(it => `
         <div style="display:flex;gap:12px;align-items:center;margin-bottom:10px">
-          <span class="cart-row__media" style="width:48px;height:48px;font-size:1.4rem;${tileStyle(it.accent_color)}">${it.emoji || '🫙'}</span>
+          <span class="cart-row__media" style="width:48px;height:48px;${tileStyle(it.accent_color)}">${productIcon(it, 'tile-ico tile-ico--sm')}</span>
           <div style="flex:1"><div style="font-size:.9rem;font-weight:600">${Fmt.escape(it.product_name)}</div><div class="muted" style="font-size:.8rem">${Fmt.escape(it.variant_name)} × ${it.quantity}</div></div>
           <strong>${Fmt.money(it.line_total)}</strong>
         </div>`).join('')}

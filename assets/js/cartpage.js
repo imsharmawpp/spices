@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function render() {
     const d = Cart.data;
     if (!d.items || !d.items.length) {
-      wrap.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="big-emoji">🛒</div><h2 style="margin:12px 0">Your cart is empty</h2><a class="btn btn--primary btn--lg" href="/shop">Browse spices</a></div>`;
+      wrap.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="big-emoji">${Icons.html('bag', '#C8531B')}</div><h2 style="margin:12px 0">Your cart is empty</h2><a class="btn btn--primary btn--lg" href="/shop">Browse spices</a></div>`;
       return;
     }
     wrap.innerHTML = `
@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <div id="cart-rows">
           ${d.items.map(it => `
             <div class="cart-row">
-              <a href="/product/${it.slug}" class="cart-row__media" style="${tileStyle(it.accent_color)}">${it.emoji || '🫙'}</a>
+              <a href="/product/${it.slug}" class="cart-row__media" style="${tileStyle(it.accent_color)}">${productIcon(it)}</a>
               <div>
                 <div style="font-weight:600">${Fmt.escape(it.product_name)}</div>
                 <div class="muted" style="font-size:.85rem">${Fmt.escape(it.brand)} · ${Fmt.escape(it.variant_name)}</div>
