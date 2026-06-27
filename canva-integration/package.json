@@ -1,0 +1,18 @@
+{
+  "name": "spices-canva-integration",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Reusable Canva Connect API OAuth 2.0 (PKCE) integration for generating and exporting product images.",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "auth:url": "node src/authUrl.js",
+    "auth:token": "node src/exchangeCode.js",
+    "auth:status": "node src/status.js",
+    "templates": "node src/listTemplates.js",
+    "dataset": "node src/templateDataset.js",
+    "generate": "node src/generateImages.js"
+  }
+}

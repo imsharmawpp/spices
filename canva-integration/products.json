@@ -1,0 +1,38 @@
+{
+  "titlePrefix": "Dhaniya Powder",
+  "products": [
+    {
+      "key": "dhaniya-100g",
+      "title": "Organic Dhaniya Powder 100g",
+      "tagline": "Freshly ground coriander",
+      "image": "assets/dhaniya-1.png",
+      "autofillData": {
+        "product_name": { "type": "text", "text": "Organic Dhaniya Powder" },
+        "net_weight": { "type": "text", "text": "100 g" },
+        "tagline": { "type": "text", "text": "Freshly ground coriander" }
+      }
+    },
+    {
+      "key": "dhaniya-200g",
+      "title": "Organic Dhaniya Powder 200g",
+      "tagline": "Aromatic & pure",
+      "image": "assets/dhaniya-2.png",
+      "autofillData": {
+        "product_name": { "type": "text", "text": "Organic Dhaniya Powder" },
+        "net_weight": { "type": "text", "text": "200 g" },
+        "tagline": { "type": "text", "text": "Aromatic & pure" }
+      }
+    },
+    {
+      "key": "dhaniya-500g",
+      "title": "Organic Dhaniya Powder 500g",
+      "tagline": "Value family pack",
+      "image": "assets/dhaniya-3.png",
+      "autofillData": {
+        "product_name": { "type": "text", "text": "Organic Dhaniya Powder" },
+        "net_weight": { "type": "text", "text": "500 g" },
+        "tagline": { "type": "text", "text": "Value family pack" }
+      }
+    }
+  ]
+}
