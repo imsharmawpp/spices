@@ -11,6 +11,9 @@ final class AuthController
 {
     public function register(Request $req): void
     {
+        if (\App\Support\RateLimiter::tooMany('register:' . \App\Support\RateLimiter::ip(), 6, 600)) {
+            Response::error('RATE_LIMITED', 'Too many attempts. Please wait a few minutes and try again.', 429);
+        }
         $name = trim((string) $req->input('name', ''));
         $email = strtolower(trim((string) $req->input('email', '')));
         $password = (string) $req->input('password', '');
@@ -39,6 +42,9 @@ final class AuthController
 
     public function login(Request $req): void
     {
+        if (\App\Support\RateLimiter::tooMany('login:' . \App\Support\RateLimiter::ip(), 10, 300)) {
+            Response::error('RATE_LIMITED', 'Too many login attempts. Please wait a few minutes and try again.', 429);
+        }
         $email = strtolower(trim((string) $req->input('email', '')));
         $password = (string) $req->input('password', '');
 

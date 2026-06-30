@@ -87,6 +87,34 @@ if (str_starts_with($path, '/api')) {
     exit;
 }
 
+// Reusable DB bootstrap (auto-seeds SQLite on first run, mirrors the API path).
+$ensureDb = function () use ($root) {
+    $need = (Database::configuredDriver() === 'sqlite' || Env::bool('DB_FALLBACK_SQLITE', false))
+        && !is_file(Database::sqlitePath());
+    if ($need && Database::driver() === 'sqlite') {
+        ob_start();
+        require $root . '/database/migrate.php';
+        ob_end_clean();
+    }
+};
+
+// --- Dynamic sitemap ---
+if ($path === '/sitemap.xml') {
+    $ensureDb();
+    header('Content-Type: application/xml; charset=utf-8');
+    echo \App\Support\Seo::sitemap();
+    return;
+}
+
+// --- Security headers for HTML responses ---
+header('X-Content-Type-Options: nosniff');
+header('X-Frame-Options: SAMEORIGIN');
+header('Referrer-Policy: strict-origin-when-cross-origin');
+header('Permissions-Policy: geolocation=(), microphone=(), camera=()');
+if (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') {
+    header('Strict-Transport-Security: max-age=31536000; includeSubDomains');
+}
+
 // --- Storefront pages (clean URLs) ---
 $routesToPages = [
     '/' => 'index.html',
@@ -100,19 +128,31 @@ $routesToPages = [
     '/admin' => 'admin.html',
 ];
 
+// Serve an HTML page, injecting server-side SEO meta where a <!--SEO--> marker exists.
+$serve = function (string $file) use ($path, $ensureDb): void {
+    $html = file_get_contents($file);
+    if ($html !== false && strpos($html, '<!--SEO-->') !== false) {
+        $ensureDb();
+        $seo = '';
+        try { $seo = \App\Support\Seo::head($path); } catch (\Throwable $e) { $seo = ''; }
+        $html = str_replace('<!--SEO-->', $seo, $html);
+    }
+    echo $html;
+};
+
 // Dynamic clean URLs
 if (preg_match('#^/product/[^/]+$#', $path)) {
-    readfile(__DIR__ . '/product.html');
+    $serve(__DIR__ . '/product.html');
     return;
 }
 if (preg_match('#^/shop/[^/]+$#', $path)) {
-    readfile(__DIR__ . '/collection.html');
+    $serve(__DIR__ . '/collection.html');
     return;
 }
 
 $page = $routesToPages[$path] ?? null;
 if ($page && is_file(__DIR__ . '/' . $page)) {
-    readfile(__DIR__ . '/' . $page);
+    $serve(__DIR__ . '/' . $page);
     return;
 }
 
