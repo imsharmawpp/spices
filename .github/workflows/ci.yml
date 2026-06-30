@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+jobs:
+  test:
+    name: Lint & test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.2"
+          extensions: pdo_sqlite, sqlite3, gd, mbstring, curl, json
+          coverage: none
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: PHP syntax check
+        run: |
+          find app database index.php -name '*.php' -print0 | xargs -0 -n1 -P4 php -l
+
+      - name: JavaScript syntax check
+        run: |
+          for f in assets/js/*.js; do node --check "$f"; done
+
+      - name: Run backend test suite
+        run: php tests/run.php

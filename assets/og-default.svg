@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#2A2118"/>
+      <stop offset="0.55" stop-color="#5A3A1E"/>
+      <stop offset="1" stop-color="#9E3F12"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <circle cx="980" cy="120" r="260" fill="#E0A422" opacity="0.18"/>
+  <circle cx="180" cy="560" r="220" fill="#C8531B" opacity="0.18"/>
+  <text x="80" y="300" font-family="Georgia, 'Times New Roman', serif" font-size="96" font-weight="700" fill="#FBF8F3">Saffra<tspan fill="#E0A422">.</tspan></text>
+  <text x="84" y="370" font-family="Inter, Arial, sans-serif" font-size="34" fill="#F0E6D8">Single-origin spices · Stone-milled fresh · Made in India</text>
+</svg>

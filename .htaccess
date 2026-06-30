@@ -1,0 +1,64 @@
+# Saffra Spices — Apache config for shared / WordPress hosting (e.g. Hostinger).
+# This file lives in the WEB ROOT (public_html), alongside index.php.
+
+DirectoryIndex index.php index.html
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # If you deploy inside a sub-folder, uncomment and set this (and APP_BASE in .env):
+    # RewriteBase /your-subfolder/
+
+    # Serve existing files and directories directly (assets, html, etc.)
+    RewriteCond %{REQUEST_FILENAME} -f [OR]
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^ - [L]
+
+    # Everything else goes through the front controller (clean URLs + API)
+    RewriteRule ^ index.php [L]
+</IfModule>
+
+# Block direct web access to the backend code, database files and storage,
+# which now live alongside index.php in the web root.
+RedirectMatch 403 ^/(app|database|storage)(/|$)
+
+# Never serve dotfiles (e.g. .env, .git)
+<FilesMatch "^\.">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+# Extra safety for the env file specifically
+<Files ".env">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</Files>
+
+# Light caching for static assets
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType text/css "access plus 7 days"
+    ExpiresByType application/javascript "access plus 7 days"
+    ExpiresByType image/svg+xml "access plus 7 days"
+</IfModule>
+
+# Force UTF-8 so emoji tiles render
+AddDefaultCharset utf-8
+
+# Security headers
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    Header always set Permissions-Policy "geolocation=(), microphone=(), camera=()"
+</IfModule>

@@ -1,0 +1,43 @@
+/* Design tokens — Saffra Spices. See docs/08-ui-ux-design.md §2. */
+:root {
+  /* Colour */
+  --color-bg: #FBF8F3;
+  --color-surface: #FFFFFF;
+  --color-surface-2: #F4EEE4;
+  --color-text: #2A2118;
+  --color-muted: #8A7F70;
+  --color-primary: #C8531B;
+  --color-primary-dark: #9E3F12;
+  --color-accent: #E0A422;
+  --color-success: #3F7D3A;
+  --color-sale: #B3261E;
+  --color-border: #E7DFD3;
+
+  /* Typography */
+  --font-heading: "Cormorant Garamond", Georgia, "Times New Roman", serif;
+  --font-body: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --fs-xs: .75rem;
+  --fs-sm: .875rem;
+  --fs-base: 1rem;
+  --fs-lg: 1.125rem;
+  --fs-xl: 1.375rem;
+  --fs-h3: 1.6rem;
+  --fs-h2: clamp(1.8rem, 3.5vw, 2.6rem);
+  --fs-h1: clamp(2.4rem, 6vw, 4rem);
+
+  /* Spacing */
+  --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px;
+  --space-5: 24px; --space-6: 32px; --space-7: 48px; --space-8: 64px; --space-9: 96px;
+
+  /* Radius / shadow / motion */
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --radius-pill: 999px;
+  --shadow-card: 0 4px 20px rgba(42, 33, 24, .07);
+  --shadow-lg: 0 18px 50px rgba(42, 33, 24, .16);
+  --transition: 200ms ease;
+
+  --container: 1280px;
+  --header-h: 116px;
+}

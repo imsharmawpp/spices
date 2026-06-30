@@ -1,0 +1,20 @@
+# Environment & secrets
+.env
+
+# Local SQLite database & runtime storage
+/storage/*.sqlite
+/storage/logs/*
+/storage/cache/*
+!/storage/.gitkeep
+
+# Uploaded product photos (managed at runtime; keep folder, ignore contents)
+/uploads/products/*
+!/uploads/products/.gitkeep
+
+# Dependencies
+/vendor/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.log

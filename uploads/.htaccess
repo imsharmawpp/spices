@@ -1,0 +1,17 @@
+# Product image uploads — served as static files, never executed.
+<FilesMatch "\.(php|phtml|phar|php[0-9]|pl|cgi|py|sh|htaccess)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>
+# Disable PHP engine here as an extra safeguard
+<IfModule mod_php.c>
+    php_flag engine off
+</IfModule>
+<IfModule mod_php7.c>
+    php_flag engine off
+</IfModule>

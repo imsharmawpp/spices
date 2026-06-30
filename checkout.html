@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checkout — Saffra Spices</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/tokens.css">
+  <link rel="stylesheet" href="/assets/css/base.css">
+  <link rel="stylesheet" href="/assets/css/components.css">
+  <link rel="stylesheet" href="/assets/css/pages.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌶️</text></svg>">
+</head>
+<body>
+<main id="main" class="container section--tight"><div id="checkout-root">
+  <h1 style="text-align:center;margin-bottom:8px">Checkout</h1>
+  <div class="steps" style="justify-content:center">
+    <span class="step"><b>1</b>Details</span>
+    <span class="step"><b>2</b>Shipping</span>
+    <span class="step"><b>3</b>Payment</span>
+    <span class="step"><b>4</b>Done</span>
+  </div>
+
+  <div class="checkout-page">
+    <form class="panel" id="checkout-form">
+      <h3 style="margin-bottom:16px">Contact</h3>
+      <div class="field"><label>Email</label><input type="email" name="email" required><span class="err" data-err="email"></span></div>
+
+      <h3 style="margin:8px 0 16px">Shipping address</h3>
+      <div class="field"><label>Full name</label><input name="recipient_name" required><span class="err" data-err="recipient_name"></span></div>
+      <div class="field"><label>Phone</label><input name="phone"></div>
+      <div class="field"><label>Address line 1</label><input name="line1" required><span class="err" data-err="line1"></span></div>
+      <div class="field"><label>Address line 2 (optional)</label><input name="line2"></div>
+      <div class="form-row">
+        <div class="field"><label>City</label><input name="city" required><span class="err" data-err="city"></span></div>
+        <div class="field"><label>State / Region</label><input name="state"></div>
+      </div>
+      <div class="form-row">
+        <div class="field"><label>Postal code</label><input name="postal_code" required><span class="err" data-err="postal_code"></span></div>
+        <div class="field"><label>Country</label><input name="country" value="US"></div>
+      </div>
+
+      <h3 style="margin:8px 0 16px">Payment</h3>
+      <div class="field">
+        <label style="display:flex;align-items:center;gap:8px;font-weight:400"><input type="radio" name="payment_method" value="card" checked> Card (demo — no real charge)</label>
+        <label style="display:flex;align-items:center;gap:8px;font-weight:400"><input type="radio" name="payment_method" value="cod"> Cash on delivery</label>
+      </div>
+      <p class="note">🔒 This is a demo store. No real payment is processed; orders are recorded for the flow.</p>
+      <button class="btn btn--primary btn--block btn--lg" id="place-order" type="submit" style="margin-top:16px">Place order</button>
+    </form>
+
+    <div class="panel order-summary" id="checkout-summary"></div>
+  </div>
+</div></main>
+
+<script src="/assets/js/api.js"></script>
+<script src="/assets/js/ui.js"></script>
+<script src="/assets/js/checkout.js"></script>
+</body>
+</html>

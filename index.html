@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!--SEO-->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/tokens.css">
+  <link rel="stylesheet" href="/assets/css/base.css">
+  <link rel="stylesheet" href="/assets/css/components.css">
+  <link rel="stylesheet" href="/assets/css/pages.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌶️</text></svg>">
+</head>
+<body>
+<main id="main">
+
+  <!-- Hero slider (brand slide + one per category, built in home.js) -->
+  <section class="hero hero-slider" id="hero">
+    <div class="aurora" aria-hidden="true"><span></span><span></span><span></span></div>
+    <div class="hero__slides" id="hero-slides">
+      <div class="hero__slide is-active">
+        <div class="hero__inner">
+          <div class="hero__content">
+            <span class="eyebrow">Single-origin · Small batch</span>
+            <h1>Spices That Tell a Story</h1>
+            <p>From quiet morning chai to unforgettable feasts, our spices are sourced at origin and ground fresh to order — so every pinch sings.</p>
+            <div class="hero__cta">
+              <a class="btn btn--primary btn--lg" href="/shop">Shop the collection</a>
+              <a class="btn btn--light btn--lg" href="/shop/gift-sets">Explore gift sets</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <button class="hero__nav prev" id="hero-prev" aria-label="Previous slide">‹</button>
+    <button class="hero__nav next" id="hero-next" aria-label="Next slide">›</button>
+    <div class="hero__dots" id="hero-dots"></div>
+  </section>
+
+  <!-- Marquee -->
+  <div class="marquee" aria-hidden="true">
+    <div class="marquee__track">
+      <span>Freshly Ground</span><span>Single Origin</span><span>No Fillers</span><span>Stone-Milled</span><span>Small Batch</span><span>Sourced at Origin</span>
+      <span>Freshly Ground</span><span>Single Origin</span><span>No Fillers</span><span>Stone-Milled</span><span>Small Batch</span><span>Sourced at Origin</span>
+    </div>
+  </div>
+
+  <!-- Stats band -->
+  <section class="section--tight reveal" style="padding-block:48px">
+    <div class="container stats">
+      <div class="stat"><div class="stat__num" data-count="12000" data-suffix="+">0</div><div class="stat__label">Happy cooks</div></div>
+      <div class="stat"><div class="stat__num" data-count="40" data-suffix="+">0</div><div class="stat__label">Spices &amp; blends</div></div>
+      <div class="stat"><div class="stat__num" data-count="100" data-suffix="%">0</div><div class="stat__label">Pure, no fillers</div></div>
+      <div class="stat"><div class="stat__num" data-count="4.9" data-dec="1" data-suffix="★">0</div><div class="stat__label">Average rating</div></div>
+    </div>
+  </section>
+
+  <!-- Value strip -->
+  <section class="section--tight reveal" style="padding-block:32px;border-bottom:1px solid var(--color-border)">
+    <div class="container value-strip">
+      <div class="v-item"><div class="v-ico"><i data-icon="globe"></i></div><strong>Sourced at origin</strong><p>Direct from growers</p></div>
+      <div class="v-item"><div class="v-ico"><i data-icon="grinder"></i></div><strong>Ground fresh</strong><p>In small batches</p></div>
+      <div class="v-item"><div class="v-ico"><i data-icon="truck" data-color="#C8531B"></i></div><strong>Free shipping</strong><p>On orders over <span data-money="999"></span></p></div>
+      <div class="v-item"><div class="v-ico"><i data-icon="leaf"></i></div><strong>No fillers</strong><p>Pure spice, always</p></div>
+    </div>
+  </section>
+
+  <!-- Bestsellers -->
+  <section class="section">
+    <div class="container">
+      <div class="carousel-head reveal">
+        <div><span class="eyebrow">Loved by cooks</span><h2>Bestsellers</h2></div>
+        <a class="btn btn--light" href="/shop">View all</a>
+      </div>
+      <div class="product-grid" id="bestsellers"></div>
+    </div>
+  </section>
+
+  <!-- Category tiles -->
+  <section class="section section--tight" style="background:var(--color-surface-2)">
+    <div class="container">
+      <div class="section-head reveal"><span class="eyebrow">Browse</span><h2>Shop by category</h2></div>
+      <div class="cat-tiles" id="cat-tiles"></div>
+    </div>
+  </section>
+
+  <!-- New arrivals -->
+  <section class="section">
+    <div class="container">
+      <div class="carousel-head reveal">
+        <div><span class="eyebrow">Fresh in</span><h2>New arrivals</h2></div>
+        <a class="btn btn--light" href="/shop?sort=newest">View all</a>
+      </div>
+      <div class="product-grid" id="new-arrivals"></div>
+    </div>
+  </section>
+
+  <!-- Promo banner -->
+  <section class="section">
+    <div class="container">
+      <div class="promo reveal">
+        <div class="promo__art"><i data-icon="gift" data-color="#C8531B" class="promo-ico"></i></div>
+        <div class="promo__body">
+          <span class="eyebrow">Made to gift</span>
+          <h2>The Spice Lovers Gift Box</h2>
+          <p>Six of our most-loved spices and blends in a beautiful wooden box, with a handwritten card. The perfect present for any home cook.</p>
+          <a class="btn btn--primary btn--lg" href="/product/spice-lovers-gift-box">Shop the gift box</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Bento: the Saffra difference -->
+  <section class="section">
+    <div class="container">
+      <div class="section-head reveal">
+        <span class="eyebrow">Why Saffra</span>
+        <h2>Crafted for your <span class="rotator"><span>curries</span><span>morning chai</span><span>biryani</span><span>weekend grills</span></span></h2>
+      </div>
+      <div class="bento reveal">
+        <div class="bento__cell bento__cell--lg bento__cell--accent">
+          <div class="ico"><i data-icon="flame"></i></div>
+          <h3>Ground fresh to order</h3>
+          <p>We mill in small batches the week we ship, so the aroma you smell is the flavour you taste — never dusty, never flat.</p>
+        </div>
+        <div class="bento__cell"><div class="ico"><i data-icon="globe"></i></div><h3>Sourced at origin</h3><p>Direct from growers.</p></div>
+        <div class="bento__cell bento__cell--dashed"><div class="ico"><i data-icon="flask"></i></div><h3>Lab-tested purity</h3><p>No fillers or dyes.</p></div>
+        <div class="bento__cell bento__cell--wide"><div class="ico"><i data-icon="leaf"></i></div><h3>Single-origin &amp; organic options</h3><p>Traceable from farm to your kitchen, with certified-organic picks across the range.</p></div>
+        <div class="bento__cell"><div class="ico"><i data-icon="lock" data-color="#C8531B"></i></div><h3>Sealed fresh</h3><p>Aroma-lock pouches.</p></div>
+        <div class="bento__cell"><div class="ico"><i data-icon="truck" data-color="#C8531B"></i></div><h3>Fast delivery</h3><p>Free over <span data-money="999"></span>.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- UGC / Follow our journey -->
+  <section class="section section--tight">
+    <div class="container">
+      <div class="section-head reveal"><span class="eyebrow">@saffraspices</span><h2>Follow our journey</h2><p>Tag us in your kitchen creations to be featured.</p></div>
+      <div class="ugc-grid">
+        <div class="ugc reveal" style="background:linear-gradient(135deg,#E0A42233,#E0A42211)"><i data-icon="bowl" data-color="#E0A422"></i></div>
+        <div class="ugc reveal" style="background:linear-gradient(135deg,#C8531B33,#C8531B11)"><i data-icon="flame" data-color="#C8531B"></i></div>
+        <div class="ugc reveal" style="background:linear-gradient(135deg,#3F7D3A33,#3F7D3A11)"><i data-icon="leaf" data-color="#3F7D3A"></i></div>
+        <div class="ugc reveal" style="background:linear-gradient(135deg,#9E3F1233,#9E3F1211)"><i data-icon="jar" data-color="#9E3F12"></i></div>
+        <div class="ugc reveal" style="background:linear-gradient(135deg,#B3261E33,#B3261E11)"><i data-icon="saffron" data-color="#B3261E"></i></div>
+        <div class="ugc reveal" style="background:linear-gradient(135deg,#7A5C3E33,#7A5C3E11)"><i data-icon="gift" data-color="#7A5C3E"></i></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA band -->
+  <section class="section">
+    <div class="container">
+      <div class="cta-band reveal">
+        <div class="aurora" aria-hidden="true"><span></span><span></span><span></span></div>
+        <span class="eyebrow" style="color:var(--color-accent)">Get 10% off your first order</span>
+        <h2>Bring your cooking to life</h2>
+        <p>Join thousands of home cooks discovering what truly fresh, single-origin spice tastes like. Use code <strong>WELCOME10</strong> at checkout.</p>
+        <a class="btn btn--primary btn--lg" href="/shop">Start shopping</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script src="/assets/js/api.js"></script>
+<script src="/assets/js/ui.js"></script>
+<script src="/assets/js/home.js"></script>
+</body>
+</html>
