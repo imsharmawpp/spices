@@ -16,7 +16,8 @@
     },
     "scripts": {
         "migrate": "php database/migrate.php",
-        "serve": "php -S 127.0.0.1:8000 -t public public/index.php"
+        "serve": "php -S 127.0.0.1:8000 index.php",
+        "test": "php tests/run.php"
     },
     "config": {
         "sort-packages": true

@@ -139,4 +139,42 @@ final class CheckoutController
         $stmt->execute([$userId]);
         Response::json($stmt->fetchAll());
     }
+
+    /**
+     * Payment webhook. For the mock provider this is a no-op acknowledgement.
+     * For a real gateway (e.g. Razorpay) it verifies the HMAC signature before
+     * marking the referenced order paid. See docs/05-api-spec.md §2.5.
+     */
+    public function webhook(Request $req): void
+    {
+        $provider = \App\Services\Payment::provider();
+        if ($provider === 'mock') {
+            Response::json(['ok' => true, 'provider' => 'mock']);
+        }
+
+        $raw = file_get_contents('php://input') ?: '';
+        $sig = $_SERVER['HTTP_X_RAZORPAY_SIGNATURE'] ?? ($_SERVER['HTTP_X_WEBHOOK_SIGNATURE'] ?? '');
+        $secret = (string) \App\Support\Env::get('PAYMENT_WEBHOOK_SECRET', '');
+
+        if (!\App\Services\Payment::verifyWebhook($raw, $sig, $secret)) {
+            \App\Support\Logger::error('Rejected payment webhook (bad signature)', ['provider' => $provider]);
+            Response::error('INVALID_SIGNATURE', 'Webhook signature verification failed', 400);
+        }
+
+        $payload = json_decode($raw, true) ?: [];
+        $orderNumber = $payload['order_number'] ?? ($payload['notes']['order_number'] ?? null);
+        if ($orderNumber) {
+            $pdo = Database::connection();
+            $stmt = $pdo->prepare('SELECT id,status FROM orders WHERE order_number=?');
+            $stmt->execute([$orderNumber]);
+            if ($order = $stmt->fetch()) {
+                if ($order['status'] === 'pending') {
+                    $pdo->prepare('UPDATE orders SET status="paid" WHERE id=?')->execute([$order['id']]);
+                    $pdo->prepare('INSERT INTO order_status_history (order_id,from_status,to_status,note) VALUES (?,?,?,?)')
+                        ->execute([$order['id'], 'pending', 'paid', 'Payment confirmed via webhook']);
+                }
+            }
+        }
+        Response::json(['ok' => true]);
+    }
 }

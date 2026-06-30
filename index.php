@@ -79,6 +79,7 @@ if (str_starts_with($path, '/api')) {
         require $root . '/app/routes.php';
         $router->dispatch(new Request());
     } catch (\Throwable $e) {
+        \App\Support\Logger::error($e->getMessage(), ['file' => $e->getFile(), 'line' => $e->getLine(), 'path' => $path]);
         if (Env::bool('APP_DEBUG', false)) {
             Response::error('SERVER_ERROR', $e->getMessage() . ' @ ' . $e->getFile() . ':' . $e->getLine(), 500);
         }

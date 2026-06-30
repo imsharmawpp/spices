@@ -91,7 +91,9 @@ final class Database
     /** SQLite db file path (for existence checks / auto-seed). */
     public static function sqlitePath(): string
     {
-        $path = Env::get('DB_SQLITE_PATH', 'storage/database.sqlite');
+        // Allow tests to point at a throwaway DB without touching .env.
+        $override = getenv('DB_SQLITE_PATH_OVERRIDE');
+        $path = $override ?: Env::get('DB_SQLITE_PATH', 'storage/database.sqlite');
         if ($path[0] !== '/') {
             $path = dirname(__DIR__, 2) . '/' . $path;
         }

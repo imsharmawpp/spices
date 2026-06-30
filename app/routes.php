@@ -45,6 +45,7 @@ $router->get('/api/account/orders', [$checkout, 'myOrders']);
 // Checkout & orders
 $router->post('/api/checkout/quote', [$checkout, 'quote']);
 $router->post('/api/orders', [$checkout, 'placeOrder']);
+$router->post('/api/payments/webhook', [$checkout, 'webhook']);
 $router->get('/api/orders/{order_number}', [$checkout, 'showOrder']);
 
 // Content
